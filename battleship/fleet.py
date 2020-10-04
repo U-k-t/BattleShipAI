@@ -1,12 +1,5 @@
+from exceptions.exception import * # All the Exception Classes
 from battleship.ships import Ship
-
-# Thrown if a ship's coordinates are not valid
-class InvalidShipPlacementException(Exception):
-	pass
-
-# Thrown if a ship already exists within the fleet	
-class ShipAlreadyExistsException(Exception):
-	pass
 
 class Fleet:
 	
@@ -30,12 +23,15 @@ class Fleet:
 			coords = new_ship.get_coord()
 			for ship in self.ships:
 				if ship.get_name() == new_ship.get_name(): # if adding a ship type that was already added (ex: another Carrier)
-					ship = new_ship # Replace previous placement of ship
-					break
+					old_coords = ship.get_coord()
+					at = self.ships.index(ship)
+					self.ships[at] = new_ship # Replace previous placement of ship
+					return old_coords
 				elif ship.is_already_placed(coords):
-					raise InvalidShipPlacementException("Ship already exists at given coordinates")
+					raise InvalidShipPlacementException("Ship already exists at given coordinates." )
 			
 			self.ships.append(new_ship) # Does not already exist on the fleet. Added to the fleet
+			return None
 		else:
 			raise ShipAlreadyExistsException("Already added/duplicate request")
 	

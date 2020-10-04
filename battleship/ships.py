@@ -1,9 +1,5 @@
-from repository.image_repository import ImageRepository
-
-# Thrown if a ship is not created properly
-class InvalidShipException(Exception):
-	pass
-
+from exceptions.exception import * # All the Exception Classes
+from repository.image_repository import ImageRepository # Repository of images as base 64
 
 '''*****************************************************************
 Class Ship:

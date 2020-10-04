@@ -1,11 +1,7 @@
-from repository.image_repository import ImageRepository
-from battleship.fleet import *
-from battleship.ships import *
-
-# If the position that a player attempts to hit is already taken. 
-class AlreadyPointTakenException(Exception):
-	pass
-
+from repository.image_repository import ImageRepository # Repository of images as base 64
+from exceptions.exception import * # All the Exception Classes
+from battleship.fleet import Fleet
+from battleship.ships import Ship
 
 '''*****************************************************************
  Class Player
@@ -31,16 +27,19 @@ class Player:
 	def finish_board_placement(self):
 		return self.fleet.is_valid_fleet()
 	
-	''' TODO: bug replacing board image'''	
-	def place_ship(self, new_ship):
+	def place_ship(self, new_ship, flag):
 		try:
-			self.fleet.add_ship(new_ship)
-			for position in new_ship.get_coord():
-				self.board[position[0]][position[1]] = new_ship.get_token()
+			replaced_coords = self.fleet.add_ship(new_ship)
+			if replaced_coords != None:
+				for coord in replaced_coords:
+					self.board[coord[0]][coord[1]] = ImageRepository.get_empty_image()
+			if not flag:
+				for position in new_ship.get_coord():
+					self.board[position[0]][position[1]] = new_ship.get_token()
 				
-		except (InvalidShipPlacementException, ShipAlreadyExistsException):
-			print("exception thrown, halt program") # Temporary action. 
- 			
+		except (InvalidShipPlacementException, ShipAlreadyExistsException) as ex:
+			print("exception thrown, halt program :" + str(ex) )# Temporary action. 
+ 		
 	def defend(self, coords): # THIS IS IF THE ENEMY OF THIS CURRENT OBJECT IS FIRING. 
 		if self.board[coords[0]][coords[1]] == ImageRepository.get_hit_image() or self.board[coords[0]][coords[1]] == ImageRepository.get_miss_image():
 			raise AlreadyPointTakenException("(other) player has already attempted an attack on this (row,col) point")
