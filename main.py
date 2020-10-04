@@ -70,8 +70,8 @@ def main():
 		elif event == "How To Play":
 			# Instructions on how to play (we can remove this)
 			print("Help Pressed")
-		elif "Enemy" in event:
-			coords = eval(event.replace("Enemy ", ""))
+		elif "Enemy" in event: # Buttons on Enemy Board are keyed "Enemy " + str(coordinates)
+			coords = eval(event.replace("Enemy ", "")) # Evaluate the coordinates to a tuple
 			enemy.fire(coords,enemyFleet)
 
 	window.close()
