@@ -2,8 +2,8 @@ import PySimpleGUI as sg # sg : simple gui
 from repository.image_repository import ImageRepository # Repository of images as base 64
 from exceptions.exception import * # All the Exception Classes
 from battleship.ships import * # All the ship classes
-from player import Player 
-from AI import AI
+from players.player import Player 
+from players.AI import AI
 
 
 

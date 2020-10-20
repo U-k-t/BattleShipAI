@@ -1,5 +1,5 @@
 from exceptions.exception import * # All the Exception Classes
-from player import Player
+from players.player import Player
 from battleship.fleet import Fleet
 from battleship.ships import *
 
