@@ -80,7 +80,7 @@ class Ship():
 		return False
 		
 	def has_sunk(self):
-		return len(self.coordinates) == 0 # Returns True if the ship has been sunk ( No coordinates left)
+		return self.coordinates is None or len(self.coordinates) == 0 # Returns True if the ship has been sunk ( No coordinates left)
 
 class Patrol(Ship):
 	
