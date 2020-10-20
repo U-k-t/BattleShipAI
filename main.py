@@ -54,11 +54,15 @@ class Game:
 			
 		self.window = sg.Window("Battleship", self.create_ship_placement_layout(), icon = "assets/battleship.ico", margins = (30, 30))
 		self.enemy.create_board()
-		
+	
 	@staticmethod
 	def end_game(self):
-		if Game.__instance != None:
-			self.window.close()
+		if Game.__instance == None: 
+			self.window.close()			
+		
+	def game_over(self, who_won):
+		self.window.close()
+		self.window = sg.Window("Battleship", self.create_game_over_layout(who_won), icon = "assets/battleship.ico", margins = (30, 30), finalize=True)
 	
 	def read(self):
 		return self.window.read()
@@ -155,6 +159,22 @@ class Game:
 		
 		return layout
 	
+	def create_game_over_layout(self, who_won):
+		# Menu Bar at the top. We can add other options for how we want to see stuff.
+		menu_bar = [ ["Game", ["New Game", "Exit Game"]],
+					 ["Help", ["How To Play"]]]
+					 
+		# Start what the window will look like:
+		layout = [[sg.Menu(menu_bar, tearoff = False, key="-MENU-")],
+				  [sg.Text("Player vs. BUTTS the Battleship game AI")],
+				  [sg.Image('assets/battleship_title.png', size=(400,200))]]
+				  
+		layout += [[sg.Text("GAME OVER!" + who_won )],
+				   [sg.Text("Play again?")],
+				   [sg.Button("Yes", key="New Game"), sg.Button("No", key="Exit Game")]]
+	   
+		return layout
+	
 	'''*******************************************
 		Ship Placement Set Up Methods
 	*******************************************'''
@@ -178,16 +198,23 @@ class Game:
 	*******************************************'''
 	def attack_enemy(self, target):
 		try:
-			self.enemy.defend(target)
-			return True
+			if self.enemy.defend(target):
+				# GAME OVER, player win!
+				print("Player won!")
+				self.game_over("player won!")
+				return False
+			return True # sucessful attack
 		except(AlreadyPointTakenException):
 			print("Invalid target given by Player")
 			return False
 	
 	def attack_player(self):
 		try: 
-			self.player.defend(self.enemy.give_target())
-			return True
+			if self.player.defend(self.enemy.give_target()):
+				# GAME OVER, AI win!
+				self.game_over("AI won!")
+				return False
+			return True # sucessful attack 
 		except(AlreadyPointTakenException):
 			print("Invalid target given by AI")
 			return False

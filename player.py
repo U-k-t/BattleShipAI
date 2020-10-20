@@ -29,7 +29,7 @@ class Player:
 	
 	def place_ship(self, new_ship, flag):
 		try:
-			replaced_coords = self.fleet.add_ship(new_ship)
+			replaced_coords = self.fleet.add_ship(new_ship) # if return None: Did not replace. 
 			if replaced_coords != None:
 				for coord in replaced_coords:
 					self.board[coord[0]][coord[1]] = ImageRepository.get_empty_image()
@@ -39,7 +39,8 @@ class Player:
 				
 		except (InvalidShipPlacementException, ShipAlreadyExistsException) as ex:
 			print("exception thrown, halt program :" + str(ex) )# Temporary action. 
- 		
+ 	
+	# Returns True if this player lost. (GAME OVER)	
 	def defend(self, coords): # THIS IS IF THE ENEMY OF THIS CURRENT OBJECT IS FIRING. 
 		if self.board[coords[0]][coords[1]] == ImageRepository.get_hit_image() or self.board[coords[0]][coords[1]] == ImageRepository.get_miss_image():
 			raise AlreadyPointTakenException("(other) player has already attempted an attack on this (row,col) point")
@@ -47,3 +48,5 @@ class Player:
 			self.board[coords[0]][coords[1]] = ImageRepository.get_hit_image()
 		else: # If the hit was not taken, change the board image at current position to an O (miss)
 			self.board[coords[0]][coords[1]] = ImageRepository.get_miss_image()
+		
+		return self.fleet.is_empty() # returns true if CURRENT object lost

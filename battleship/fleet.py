@@ -36,7 +36,6 @@ class Fleet:
 			raise ShipAlreadyExistsException("Already added/duplicate request")
 	
 	def is_valid_fleet(self): # There MUST be 5 ships on the fleet otherwise, not a valid fleet. 
-		print(len(self.ships))
 		return len(self.ships) == 5
 		
 	
@@ -46,5 +45,10 @@ class Fleet:
 	def check_for_damage(self, coords):
 		for ship in self.ships:
 			if ship.hit(coords):
+				if ship.has_sunk():
+					self.ships.remove(ship)
 				return True
 		return False
+		
+	def is_empty(self):
+		return self.ships is None or len(self.ships) <= 0
