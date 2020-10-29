@@ -1,6 +1,7 @@
 import PySimpleGUI as sg # sg : simple gui
 from repository.image_repository import ImageRepository # Repository of images as base 64
 from exceptions.exception import * # All the Exception Classes
+from players.database import Database
 from battleship.ships import * # All the ship classes
 from players.player import Player 
 from players.AI import AI
@@ -73,6 +74,7 @@ class Game:
 	def next_turn(self):
 		if self.turn == "position":
 			if self.player.finish_board_placement():
+				Database.get_instance().save_board(self.player.get_fleet())
 				self.turn = "play"
 			else: 
 				raise BoardNotCompleteException("Player has not finished placing all ships")

@@ -20,7 +20,10 @@ class Player:
 		
 	def get_board(self):
 		return self.board
-		
+	
+	def get_fleet(self):
+		return self.fleet.get_ships()
+	
 	'''*************************************************************
 		Action Methods:
 	*************************************************************'''
