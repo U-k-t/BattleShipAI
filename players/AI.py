@@ -1,7 +1,9 @@
 from exceptions.exception import * # All the Exception Classes
 from players.player import Player
+from players.database import Database
 from battleship.fleet import Fleet
 from battleship.ships import *
+
 
 import random
 
@@ -31,3 +33,5 @@ class AI(Player):
 	# ToDo: Implement
 	def give_target(self):
 		return (random.randint(0, 9), random.randint(0,9))
+		
+	
