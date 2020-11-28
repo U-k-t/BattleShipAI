@@ -5,7 +5,10 @@ from players.database import Database
 from battleship.ships import * # All the ship classes
 from players.player import Player 
 from players.AI import AI
+from players.BUTTSBasic import Basic
+from players.BUTTS import Advanced
 
+import time
 
 
 '''***********************************************
@@ -29,9 +32,9 @@ class Game:
 		'''**************************
 			Game Variables
 		**************************'''
-		self.player = Player()
-		self.enemy = AI()
-		self.turn = "position"
+		self.player1 = None
+		self.player2 = None
+		self.turn = None
 		
 		self.window =  None
 	
@@ -46,15 +49,46 @@ class Game:
 		if Game.__instance == None:
 			Game()
 		else:
-			self.player = Player()
-			self.enemy = AI()
-			self.turn = "position"
-			
 			if self.window != None:
 				self.window.close()
 			
+		self.window = sg.Window("Battleship", self.create_init_menu_layout(), icon = "assets/battleship.ico", margins = (30, 30))
+	
+	@staticmethod
+	def new_player_vs_basic(self):
+		print( "Selected game mode: Player vs Basic AI")
+		self.player1 = Player()
+		self.player2 = Basic()
+		self.turn = "position"
+		
+		self.window.close()
 		self.window = sg.Window("Battleship", self.create_ship_placement_layout(), icon = "assets/battleship.ico", margins = (30, 30))
-		self.enemy.create_board()
+		self.player2.create_board()
+		
+	@staticmethod
+	def new_player_vs_advanced(self):
+		print( "Selected game mode: Player vs Advanced AI")
+		self.player1 = Player()
+		self.player2 = Advanced()
+		self.turn = "position"
+		
+		self.window.close()
+		self.window = sg.Window("Battleship", self.create_ship_placement_layout(), icon = "assets/battleship.ico", margins = (30, 30))
+		self.player2.create_board()
+	
+	@staticmethod
+	def new_basic_vs_advanced(self):
+		print( "Selected game mode: Basic AI vs Advanced AI")
+		self.player1 = Basic()
+		self.player2 = Advanced()
+		self.turn = "battle"
+		
+		self.player1.create_board()
+		self.player2.create_board()
+		self.window.close()
+		self.window = sg.Window("Battleship", self.create_ai_battle_layout(), icon = "assets/battleship.ico", margins = (30, 30))
+
+	
 	
 	@staticmethod
 	def end_game(self):
@@ -73,8 +107,8 @@ class Game:
 	
 	def next_turn(self):
 		if self.turn == "position":
-			if self.player.finish_board_placement():
-				Database.get_instance().save_board(self.player.get_fleet())
+			if self.player1.finish_board_placement():
+				Database.get_instance().save_board(self.player1.get_fleet())
 				self.turn = "play"
 			else: 
 				raise BoardNotCompleteException("Player has not finished placing all ships")
@@ -98,13 +132,33 @@ class Game:
 		elif self.turn == "play":
 			self.window.close()
 			self.window = sg.Window("Battleship", self.create_game_layout(), icon = "assets/battleship.ico", margins = (30, 30), finalize=True)
-			self.toggle_player_board_buttons(True)
+			self.toggle_player_board_buttons(true)
+		elif self.turn == "battle":
+			self.window.close()
+			self.window = sg.Window("Battleship", self.create_ai_battle_layout(), icon = "assets/battleship.ico", margins = (30, 30), finalize=True)
 			
 	def __create_grid(self, board, type_of_button):
 		board_layout = [[sg.Button('', image_data=board[row][col], button_color=(sg.theme_background_color(), sg.theme_background_color()), size = (4,2), pad=(0,0), key=type_of_button + str((row,col))) for col in range(Player.BOARD_SIZE)] for row in range(Player.BOARD_SIZE)]
 		return board_layout
 	
-	def create_ship_placement_layout(self): # INITIAL Layout at begin of game. 
+	def create_init_menu_layout(self): # INITIAL Layout at begin of game. 
+		# Menu Bar at the top. We can add other options for how we want to see stuff.
+		menu_bar = [ ["Game", ["New Game", "Exit Game"]],
+						  ["Help", ["How To Play"]]]
+						  
+		# Start what the window will look like:
+		layout = [[sg.Menu(menu_bar, tearoff = False, key="-MENU-")],
+				  [sg.Text("Main Menu")],
+				  [sg.Image('assets/battleship_title.png', size=(600,200))]]
+		
+		button_selection_layout = [[sg.Button('You vs Basic AI', key="basic")],
+								   [sg.Button('You vs Advanced AI', key="advanced")],
+								   [sg.Button('Watch the AI\'s battle it out', key="battle")]]
+		layout += button_selection_layout
+		return layout
+				  
+				  
+	def create_ship_placement_layout(self): 
 		# Menu Bar at the top. We can add other options for how we want to see stuff.
 		menu_bar = [ ["Game", ["New Game", "Exit Game"]],
 						  ["Help", ["How To Play"]]]
@@ -116,7 +170,7 @@ class Game:
 				  [sg.Text("Place each ship on the board by clicking the respected button")]]
 		
 		player_board_layout = [[sg.Text("Player Board:")]]
-		player_board_layout += self.__create_grid(self.player.get_board(), "Player ") # Initializes each button with key "Player (row,col)"
+		player_board_layout += self.__create_grid(self.player1.get_board(), "Player ") # Initializes each button with key "Player (row,col)"
 	
 		ship_button_layout = [[sg.Button('', image_data=ImageRepository.get_patrol_image(), button_color=(sg.theme_background_color(),sg.theme_background_color()), pad=(0,0), key="patrol")],
 					  [sg.Button('', image_data=ImageRepository.get_submarine_image(), button_color=(sg.theme_background_color(),sg.theme_background_color()), pad=(0,0), key="submarine")],
@@ -141,13 +195,13 @@ class Game:
 		layout = [[sg.Menu(menu_bar, tearoff = False, key="-MENU-")],
 				  [sg.Text("Player vs. BUTTS the Battleship game AI")],
 				  [sg.Image('assets/battleship_title.png', size=(800,200))]]
-				  
+				
 		player_board_layout = [[sg.Text("Player Board:")]]
-		player_board_layout += self.__create_grid(self.player.get_board(), "Player ") # Initializes each button with key "Player (row,col)"
+		player_board_layout += self.__create_grid(self.player1.get_board(), "Player ") # Initializes each button with key "Player (row,col)"
 		
 		enemy_board_layout = [[sg.Text("Enemy Board:")]]
-		enemy_board_layout += self.__create_grid(self.enemy.get_board(), "Enemy ") # Initializes each button with key "Enemy (row,col)"
-		
+		enemy_board_layout += self.__create_grid(self.player2.get_board(), "Enemy ") # Initializes each button with key "Enemy (row,col)"
+				
 		ship_button_layout = [[sg.Image('assets/patrol.png')],
 					  [sg.Image('assets/sub.png')],
 					  [sg.Image('assets/destroyer.png')],
@@ -158,6 +212,30 @@ class Game:
 				    sg.Column(player_board_layout),
 					sg.VSeperator(), # Line that separates the two.
 					sg.Column(enemy_board_layout)]]
+		
+		return layout
+	
+	def create_ai_battle_layout(self):
+		# Menu Bar at the top. We can add other options for how we want to see stuff.
+		menu_bar = [ ["Game", ["New Game", "Exit Game"]],
+						  ["Help", ["How To Play"]]]
+	
+		# Start what the window will look like:
+		layout = [[sg.Menu(menu_bar, tearoff = False, key="-MENU-")],
+				  [sg.Text("Battle of the BUTTS: Basic vs Advanced")],
+				  [sg.Image('assets/battleship_title.png', size=(600,200))]]
+				
+		player_board_layout = [[sg.Text("Basic Board:")]]
+		player_board_layout += self.__create_grid(self.player1.get_board(), "Player ") # Initializes each button with key "Player (row,col)"
+		
+		enemy_board_layout = [[sg.Text("Advanced Board:")]]
+		enemy_board_layout += self.__create_grid(self.player2.get_board(), "Enemy ") # Initializes each button with key "Enemy (row,col)"
+				
+		
+		layout += [[sg.Column(player_board_layout),
+					sg.VSeperator(), # Line that separates the two.
+					sg.Column(enemy_board_layout)],
+					[sg.Button("Next", key="next")]]
 		
 		return layout
 	
@@ -181,26 +259,26 @@ class Game:
 		Ship Placement Set Up Methods
 	*******************************************'''
 	def on_click_patrol_button(self, start, end):
-		self.player.place_ship(Patrol(start,end), False)
+		self.player1.place_ship(Patrol(start,end), False)
 		
 	def on_click_submarine_button(self, start, end):
-		self.player.place_ship(Submarine(start, end), False)
+		self.player1.place_ship(Submarine(start, end), False)
 		
 	def on_click_destroyer_button(self, start, end):
-		self.player.place_ship(Destroyer(start, end), False)
+		self.player1.place_ship(Destroyer(start, end), False)
 		
 	def on_click_battleship_button(self, start, end):
-		self.player.place_ship(Battleship(start, end), False)
+		self.player1.place_ship(Battleship(start, end), False)
 		
 	def on_click_carrier_button(self, start, end):
-		self.player.place_ship(Carrier(start, end), False)
+		self.player1.place_ship(Carrier(start, end), False)
 		
 	'''*******************************************
 		In Game Action Methods
 	*******************************************'''
 	def attack_enemy(self, target):
 		try:
-			if self.enemy.defend(target):
+			if self.player2.defend(target):
 				# GAME OVER, player win!
 				print("Player won!")
 				self.game_over("player won!")
@@ -210,60 +288,85 @@ class Game:
 			print("Invalid target given by Player")
 			return False
 	
-	def attack_player(self):
+	def attack_player1(self):
 		try: 
-			if self.player.defend(self.enemy.give_target()):
-				# GAME OVER, AI win!
-				self.game_over("AI won!")
+			if self.player1.defend(self.player2.give_target()):
+				# GAME OVER, Advanced win!
+				self.game_over("Advanced won!")
 				return False
 			return True # sucessful attack 
 		except(AlreadyPointTakenException):
-			print("Invalid target given by AI")
+			print("Invalid target given by AI: Advanced")
 			return False
+			
+	def attack_player2(self):
+		try: 
+			if self.player2.defend(self.player1.give_target()):
+				# GAME OVER, Basic win!
+				self.game_over("Basic won!")
+				return False
+			return True # sucessful attack 
+		except(AlreadyPointTakenException):
+			print("Invalid target given by AI: Basic")
+			return False
+			
 	
+# Reminders: MUST CATCH EXCEPTIONS
 def main():
 	
 	Game.new_game(Game())
 	game = Game.get_instance()
 	
-	# TODO: Add Turn based event check
-	#  [] Ship Placement Turn (AI Does in background)
-	#  [x] Player Goes first, Turn based
-	#  [] Refreshes board layout after turn taken
-	# Reminders: MUST CATCH EXCEPTIONS
-	
 	wait = 0 # Forces the player to perform 2 actions. There is a better way to do this, but idk how yet. 
 	startcoord = -1
 	endcoord = -1
+	next = 1
 	
 	#Event Loop:
 	while True:
-		event, values = game.read()
+		event, values = Game.get_instance().read()
 		
 		# event = the string that represents the key of a button pressed.
 		if event == sg.WIN_CLOSED or event == "Exit Game":
 			# If user chooses to exit the game
-			Game.end_game(game)
+			Game.end_game(Game.get_instance())
 			break
 		elif event == "New Game":
 			print("New Game Pressed")
-			Game.new_game(game)
+			Game.new_game(Game.get_instance())
+		elif event == "basic":
+			Game.new_player_vs_basic(Game.get_instance())
+		elif event == "advanced":
+			Game.new_player_vs_advanced(Game.get_instance())
+		elif event == "battle":
+			Game.new_basic_vs_advanced(Game.get_instance())
 		elif event == "How To Play":
 			# Instructions on how to play (we can remove this)
 			print("Help Pressed")
+		elif event == "next": # Not a player vs Ai game but an AI vs AI game. (rest of the checks pointless)
+			if next % 2 == 0:
+				Game.get_instance().attack_player1()
+				Game.get_instance().update_ui()
+			else:
+				Game.get_instance().attack_player2()
+				Game.get_instance().update_ui()
+			
+			next = next + 1
+			
+
 		elif event == "confirm" and wait == 0:
 			# Placed Ships
 			try:
-				game.next_turn() # TODO: raises an exception MUST be caught
-				game.update_ui()
+				Game.get_instance().next_turn() 
+				Game.get_instance().update_ui()
 				wait = 1
 			except (BoardNotCompleteException):
 				print("Missing number of ship requirements")
 		elif event == "restart":
 			wait = 0
-			Game.new_game(game)
+			Game.new_game(Game.get_instance())
 		else:
-			if game.get_turn() == "position": # If turn is for placing ships. 
+			if Game.get_instance().get_turn() == "position": # If turn is for placing ships. 
 				
 				if wait == 2 and "Player" in event:
 					startcoord = eval(event.replace("Player ", ""))
@@ -274,26 +377,24 @@ def main():
 					
 					try: 
 						eval(clicked + str(startcoord) + "," + str(endcoord) + ")")
-						game.toggle_ship_placement_buttons(False)
+						Game.get_instance().toggle_ship_placement_buttons(False)
 
 					except InvalidShipException as ex:
 						print("exception thrown, continue program: " + str(ex)) # Temporary action. 
 					
-					game.update_ui()
+					Game.get_instance().update_ui()
 					
 				elif event in Game.SHIP_NAMES:
-					game.toggle_ship_placement_buttons(True)
+					Game.get_instance().toggle_ship_placement_buttons(True)
 					wait = 2
-					clicked = "game.on_click_" + event + "_button("
-			else: # If its player or AI turn. 
+					clicked = "Game.get_instance().on_click_" + event + "_button("
+			elif Game.get_instance().get_turn() == "play": # If its player or AI turn in a player vs AI game 
 				if wait == 1 and "Enemy" in event:
 					attack_coords = eval(event.replace("Enemy ", ""))
-					if game.attack_enemy(attack_coords):
+					if Game.get_instance().attack_enemy(attack_coords):
 						# PERFORM AI TURN HERE
-						game.attack_player()
-						game.update_ui()
-						
-					
+						Game.get_instance().attack_player1()
+						Game.get_instance().update_ui()
 
 
 main()

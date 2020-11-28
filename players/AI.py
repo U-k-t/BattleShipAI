@@ -82,6 +82,6 @@ class AI(Player):
 	# THIS IS RANDOM TARGET FOR TESTING 
 	# ToDo: Implement
 	def give_target(self):
-		return (random.randint(0, 9), random.randint(0,9))
+		pass
 		
 	
