@@ -16,17 +16,67 @@ class AI(Player):
 		super().__init__()
 	
 	def create_board(self):
-		patrol = Patrol((0,0), (1,0))
-		submarine = Submarine((2,3), (2,5))
-		destroyer = Destroyer((4,8), (6,8))
-		battleship = Battleship((6,2), (6,5))
-		carrier = Carrier((8,1), (8,5))
+		self.place_patrol()
+		self.place_submarine()
+		self.place_destroyer()
+		self.place_battleship()
+		self.place_carrier()
+	
+	def place_patrol(self):
+		while(True):
+			start, end = self.make_ship(2)
+			if(super().place_ship(Patrol(start, end),True)):
+				return
 		
-		super().place_ship(patrol, True)
-		super().place_ship(submarine, True)
-		super().place_ship(destroyer, True)
-		super().place_ship(battleship, True)
-		super().place_ship(carrier, True)
+	def place_submarine(self):
+		while(True):
+			start, end = self.make_ship(3)
+			if(super().place_ship(Submarine(start, end),True)):
+				return
+	
+	def place_destroyer(self):
+		while(True):
+			start, end = self.make_ship(3)
+			if(super().place_ship(Destroyer(start, end),True)):
+				return
+	
+	def place_battleship(self):
+		while(True):
+			start, end = self.make_ship(4)
+			if(super().place_ship(Battleship(start, end),True)):
+				return
+	
+	def place_carrier(self):
+		while(True):
+			start, end = self.make_ship(5)
+			if(super().place_ship(Carrier(start, end),True)):
+				return
+	
+	def make_ship(self,size):
+		coin = random.randint(0, 1)				
+		start = (random.randint(0, 9), random.randint(0,9))
+		
+		if coin == 0: #Horizontal Placement
+			left = start[0] - (size - 1)
+			right = start[0] + (size - 1)
+			if left >= 0:
+				if right <= 9:
+					end = (random.choice([left,right]), start[1])
+				else:
+					end = (left, start[1])
+			else:
+				end = (right, start[1])					
+		else: #Vertical Placement
+			up = start[1] - (size - 1)
+			down = start[1] + (size - 1)
+			if up >= 0:
+				if down <= 9:
+					end = (start[0], random.choice([up,down]))
+				else:
+					end = (start[0], up)
+			else:
+				end = (start[0], down)
+		return (start,end)
 	
 	
 	# THIS IS RANDOM TARGET FOR TESTING 
