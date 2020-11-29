@@ -15,7 +15,7 @@ class Database:
 		'''****************************
 			Database variables
 		****************************'''
-		self.connection = sqlite3.connect('assets/battleship.db')
+		self._connection = sqlite3.connect('assets/battleship.db')
 		#self.c = connection.cursor()
 	
 	@staticmethod
@@ -25,13 +25,13 @@ class Database:
 		return Database.__instance
 	
 	def get_value(self, coord, ship_name):
-		return int(self.connection.execute("SELECT {} FROM Storage WHERE coord = \"{}\"".format(ship_name, str(coord))).fetchone()[0])
+		return int(self._connection.execute("SELECT {} FROM Storage WHERE coord = \"{}\"".format(ship_name, str(coord))).fetchone()[0])
 	
 	def update(self, coord, ship_name):
 		value = self.get_value(coord, ship_name)
 		value = value + 1
-		self.connection.execute("UPDATE Storage SET {}={} WHERE coord = \"{}\";".format(ship_name, value, str(coord)))
-		self.connection.commit()
+		self._connection.execute("UPDATE Storage SET {}={} WHERE coord = \"{}\";".format(ship_name, value, str(coord)))
+		self._connection.commit()
   
 	def save_board(self, enemy_fleet):
 		for ship in enemy_fleet:
