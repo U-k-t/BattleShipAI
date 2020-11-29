@@ -26,30 +26,35 @@ class AI(Player):
 		while(True):
 			start, end = self.make_ship(2)
 			if(super().place_ship(Patrol(start, end),True)):
+				print( "PLACED A PATROL AT " +str(start) + "," + str(end))
 				return
 		
 	def place_submarine(self):
 		while(True):
 			start, end = self.make_ship(3)
 			if(super().place_ship(Submarine(start, end),True)):
+				print( "PLACED A SUBMARINE AT " +str(start) + "," + str(end))
 				return
 	
 	def place_destroyer(self):
 		while(True):
 			start, end = self.make_ship(3)
 			if(super().place_ship(Destroyer(start, end),True)):
+				print( "PLACED A DESTROYER AT " +str(start) + "," + str(end))
 				return
 	
 	def place_battleship(self):
 		while(True):
 			start, end = self.make_ship(4)
 			if(super().place_ship(Battleship(start, end),True)):
+				print( "PLACED A BATTLESHIP AT " +str(start) + "," + str(end))
 				return
 	
 	def place_carrier(self):
 		while(True):
 			start, end = self.make_ship(5)
 			if(super().place_ship(Carrier(start, end),True)):
+				print( "PLACED A CARRIER AT " +str(start) + "," + str(end))
 				return
 	
 	def make_ship(self,size):

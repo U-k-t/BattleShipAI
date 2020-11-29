@@ -144,6 +144,7 @@ class Game:
 				self.window.FindElement("player1 " + str((row,col))).Update(disabled=value)
 				self.window.FindElement("player2 " + str((row,col))).Update(disabled=value)
 	
+	@profile
 	def update_ui(self):
 		if self.turn == "position":
 			self.window.close()
@@ -303,12 +304,15 @@ class Game:
 	def attack_player1(self): # Attack uncontrolled (autonomous) 
 		try: 
 			if self.player1.defend(self.player2.give_target()):
-				# GAME OVER, Advanced win!
-				self.game_over("Advanced won!")
-				return False
+				if self.turn == "battle": # GAME OVER, Advanced win!
+					self.game_over("Advanced won!")
+				else:
+					self.game_over("AI won!")
+				return False	
+				
 			return True # sucessful attack 
 		except(AlreadyPointTakenException):
-			print("Invalid target given by AI: Advanced")
+			print("Invalid target given by AI")
 			return False
 			
 	def attack_player2(self): # Attack uncontrolled (autonomous) 
@@ -322,7 +326,7 @@ class Game:
 			print("Invalid target given by AI: Basic")
 			return False
 			
-	
+
 # Reminders: MUST CATCH EXCEPTIONS
 def main():
 	

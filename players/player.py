@@ -29,7 +29,7 @@ class Player:
 	*************************************************************'''
 	def finish_board_placement(self):
 		return self._fleet.is_valid_fleet()
-	
+
 	def place_ship(self, new_ship, flag):
 		try:
 			replaced_coords = self._fleet.add_ship(new_ship) # if return None: Did not replace. 

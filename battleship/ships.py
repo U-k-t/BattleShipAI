@@ -56,11 +56,19 @@ class Ship():
 	
 	def __init_coordinates(self, start, end): # start/end tuple coordinates
 		if (start[0] == end[0]):
-			for y in range (start[1], end[1]+1):
-				self._coordinates.append((start[0],y))
+			if start[1] < end[1]:
+				for y in range (start[1], end[1]+1):
+					self._coordinates.append((start[0],y))
+			else:
+				for y in range (end[1], start[1]+1):
+					self._coordinates.append((start[0],y))
 		else:
-			for x in range (start[0], end[0]+1):
-				self._coordinates.append((x,start[1]))
+			if start[0] < end[0]:
+				for x in range (start[0], end[0]+1):
+					self._coordinates.append((x,start[1]))
+			else:
+				for x in range (end[0], start[0]+1):
+					self._coordinates.append((x,start[1]))
 				
 
 	'''***********************
