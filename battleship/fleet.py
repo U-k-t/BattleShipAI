@@ -46,6 +46,7 @@ class Fleet:
 		for ship in self.ships:
 			if ship.hit(coords):
 				if ship.has_sunk():
+                                        print("You have sunk the enemy's " + str(ship.get_name()))
 					self.ships.remove(ship)
 				return True
 		return False
