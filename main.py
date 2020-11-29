@@ -8,8 +8,6 @@ from players.AI import AI
 from players.BUTTSBasic import Basic
 from players.BUTTS import Advanced
 
-import time
-
 
 '''***********************************************
 	class Game:
@@ -21,7 +19,7 @@ class Game:
 	__instance = None # Instance of class. 
 	SHIP_NAMES = ["patrol", "submarine", "destroyer", "battleship", "carrier"]
 	
-	def __init__(self): #Throws an exception
+	def __init__(self): #Throws an exception at creation of a new instance
 		print("Create Game Object")
 		
 		if Game.__instance == None: # Does not exist
@@ -38,13 +36,13 @@ class Game:
 		
 		self.window =  None
 	
-	@staticmethod
+	@staticmethod #retrieves the current instance
 	def get_instance():
 		if Game.__instance == None:
 			Game()
 		return Game.__instance
 		
-	@staticmethod				   
+	@staticmethod # STARTS THE APPLICATION PROCESS WINDOW (init window) 				   
 	def new_game(self):
 		if Game.__instance == None:
 			Game()
@@ -54,8 +52,13 @@ class Game:
 			
 		self.window = sg.Window("Battleship", self.create_init_menu_layout(), icon = "assets/battleship.ico", margins = (30, 30))
 	
-	@staticmethod
-	def new_player_vs_basic(self):
+	
+	@staticmethod # ENDS THE APPLICATION PROCESS WINDOW
+	def end_game(self):
+		if Game.__instance == None: 
+			self.window.close()		
+	  
+	def new_player_vs_basic(self): # initializes the game variables and window to match the style of game.
 		print( "Selected game mode: Player vs Basic AI")
 		self.player1 = Player()
 		self.player2 = Basic()
@@ -65,8 +68,8 @@ class Game:
 		self.window = sg.Window("Battleship", self.create_ship_placement_layout(), icon = "assets/battleship.ico", margins = (30, 30))
 		self.player2.create_board()
 		
-	@staticmethod
-	def new_player_vs_advanced(self):
+	
+	def new_player_vs_advanced(self): # initializes the game variables and window to match the style of game.
 		print( "Selected game mode: Player vs Advanced AI")
 		self.player1 = Player()
 		self.player2 = Advanced()
@@ -76,8 +79,8 @@ class Game:
 		self.window = sg.Window("Battleship", self.create_ship_placement_layout(), icon = "assets/battleship.ico", margins = (30, 30))
 		self.player2.create_board()
 	
-	@staticmethod
-	def new_basic_vs_advanced(self):
+
+	def new_basic_vs_advanced(self): # initializes the game variables and window to match the style of game.
 		print( "Selected game mode: Basic AI vs Advanced AI")
 		self.player1 = Basic()
 		self.player2 = Advanced()
@@ -86,26 +89,14 @@ class Game:
 		self.player1.create_board()
 		self.player2.create_board()
 		self.window.close()
-		self.window = sg.Window("Battleship", self.create_ai_battle_layout(), icon = "assets/battleship.ico", margins = (30, 30))
+		self.window = sg.Window("Battleship", self.create_ai_battle_layout(), icon = "assets/battleship.ico", margins = (30, 30), finalize=True)
+		self.toggle_both_board_buttons(True)
 
-	
-	
-	@staticmethod
-	def end_game(self):
-		if Game.__instance == None: 
-			self.window.close()			
-		
-	def game_over(self, who_won):
+	def game_over(self, who_won): # Ends a game that the user plays but not the application process. 
 		self.window.close()
 		self.window = sg.Window("Battleship", self.create_game_over_layout(who_won), icon = "assets/battleship.ico", margins = (30, 30), finalize=True)
 	
-	def read(self):
-		return self.window.read()
-	
-	def get_turn(self):
-		return self.turn
-	
-	def next_turn(self):
+	def next_turn(self): # sends to the next play (Used only in player vs AI games)
 		if self.turn == "position":
 			if self.player1.finish_board_placement():
 				Database.get_instance().save_board(self.player1.get_fleet())
@@ -114,7 +105,29 @@ class Game:
 				raise BoardNotCompleteException("Player has not finished placing all ships")
 	
 	'''*******************************************
-		Layout Methods
+		Layout Methods 
+			
+			Toggle methods:
+			--------------------
+			- toggle_player_board_buttons 
+			- toggle_player_board_buttons
+			- toggle_both_board_buttons
+		
+			Event Changes:
+			--------------------
+			- update_ui
+		
+			Utility:
+			--------------------
+			- __create_grid
+		
+			Entire Layout Forms:
+			--------------------
+			- create_init_menu_layout
+			- create_ship_placement_layout
+			- create_game_layout
+			- create_ai_battle_layout
+			- create_game_over_layout
 	*******************************************'''
 	def toggle_ship_placement_buttons(self, value):
 		for button_label in Game.SHIP_NAMES:
@@ -125,6 +138,12 @@ class Game:
 			for col in range(Player.BOARD_SIZE):
 				self.window.FindElement("Player " + str((row,col))).Update(disabled=value)
 	
+	def toggle_both_board_buttons(self, value):
+		for row in range(Player.BOARD_SIZE):
+			for col in range(Player.BOARD_SIZE):
+				self.window.FindElement("player1 " + str((row,col))).Update(disabled=value)
+				self.window.FindElement("player2 " + str((row,col))).Update(disabled=value)
+	
 	def update_ui(self):
 		if self.turn == "position":
 			self.window.close()
@@ -132,10 +151,11 @@ class Game:
 		elif self.turn == "play":
 			self.window.close()
 			self.window = sg.Window("Battleship", self.create_game_layout(), icon = "assets/battleship.ico", margins = (30, 30), finalize=True)
-			self.toggle_player_board_buttons(true)
+			self.toggle_player_board_buttons(True)
 		elif self.turn == "battle":
 			self.window.close()
 			self.window = sg.Window("Battleship", self.create_ai_battle_layout(), icon = "assets/battleship.ico", margins = (30, 30), finalize=True)
+			self.toggle_both_board_buttons(True)
 			
 	def __create_grid(self, board, type_of_button):
 		board_layout = [[sg.Button('', image_data=board[row][col], button_color=(sg.theme_background_color(), sg.theme_background_color()), size = (4,2), pad=(0,0), key=type_of_button + str((row,col))) for col in range(Player.BOARD_SIZE)] for row in range(Player.BOARD_SIZE)]
@@ -143,8 +163,7 @@ class Game:
 	
 	def create_init_menu_layout(self): # INITIAL Layout at begin of game. 
 		# Menu Bar at the top. We can add other options for how we want to see stuff.
-		menu_bar = [ ["Game", ["New Game", "Exit Game"]],
-						  ["Help", ["How To Play"]]]
+		menu_bar = [ ["Game", ["New Game", "Exit Game"]]]
 						  
 		# Start what the window will look like:
 		layout = [[sg.Menu(menu_bar, tearoff = False, key="-MENU-")],
@@ -158,12 +177,10 @@ class Game:
 		return layout
 				  
 				  
-	def create_ship_placement_layout(self): 
+	def create_ship_placement_layout(self): # placing ships for the player. 
 		# Menu Bar at the top. We can add other options for how we want to see stuff.
-		menu_bar = [ ["Game", ["New Game", "Exit Game"]],
-						  ["Help", ["How To Play"]]]
+		menu_bar = [ ["Game", ["New Game", "Exit Game"]]]
 
-		# Start what the window will look like:
 		layout = [[sg.Menu(menu_bar, tearoff = False, key="-MENU-")],
 				  [sg.Text("Board Placements")],
 				  [sg.Image('assets/battleship_title.png', size=(600,200))],
@@ -186,12 +203,10 @@ class Game:
 
 		return layout
 	
-	def create_game_layout(self):
+	def create_game_layout(self): # standard game layout
 		# Menu Bar at the top. We can add other options for how we want to see stuff.
-		menu_bar = [ ["Game", ["New Game", "Exit Game"]],
-						  ["Help", ["How To Play"]]]
+		menu_bar = [ ["Game", ["New Game", "Exit Game"]]]
 	
-		# Start what the window will look like:
 		layout = [[sg.Menu(menu_bar, tearoff = False, key="-MENU-")],
 				  [sg.Text("Player vs. BUTTS the Battleship game AI")],
 				  [sg.Image('assets/battleship_title.png', size=(800,200))]]
@@ -215,36 +230,33 @@ class Game:
 		
 		return layout
 	
-	def create_ai_battle_layout(self):
+	def create_ai_battle_layout(self): # form for when two AI's are battling each other
 		# Menu Bar at the top. We can add other options for how we want to see stuff.
-		menu_bar = [ ["Game", ["New Game", "Exit Game"]],
-						  ["Help", ["How To Play"]]]
+		menu_bar = [ ["Game", ["New Game", "Exit Game"]]]
 	
-		# Start what the window will look like:
 		layout = [[sg.Menu(menu_bar, tearoff = False, key="-MENU-")],
 				  [sg.Text("Battle of the BUTTS: Basic vs Advanced")],
 				  [sg.Image('assets/battleship_title.png', size=(600,200))]]
 				
-		player_board_layout = [[sg.Text("Basic Board:")]]
-		player_board_layout += self.__create_grid(self.player1.get_board(), "Player ") # Initializes each button with key "Player (row,col)"
+		player1_board_layout = [[sg.Text("Basic Board:")]]
+		player1_board_layout += self.__create_grid(self.player1.get_board(), "player1 ") 
 		
-		enemy_board_layout = [[sg.Text("Advanced Board:")]]
-		enemy_board_layout += self.__create_grid(self.player2.get_board(), "Enemy ") # Initializes each button with key "Enemy (row,col)"
+		player2_board_layout = [[sg.Text("Advanced Board:")]]
+		player2_board_layout += self.__create_grid(self.player2.get_board(), "player2 ") 
 				
 		
-		layout += [[sg.Column(player_board_layout),
+		layout += [[sg.Column(player1_board_layout),
 					sg.VSeperator(), # Line that separates the two.
-					sg.Column(enemy_board_layout)],
+					sg.Column(player2_board_layout)],
 					[sg.Button("Next", key="next")]]
 		
 		return layout
 	
+	# After a player has been determined to of won
 	def create_game_over_layout(self, who_won):
 		# Menu Bar at the top. We can add other options for how we want to see stuff.
-		menu_bar = [ ["Game", ["New Game", "Exit Game"]],
-					 ["Help", ["How To Play"]]]
+		menu_bar = [ ["Game", ["New Game", "Exit Game"]]]
 					 
-		# Start what the window will look like:
 		layout = [[sg.Menu(menu_bar, tearoff = False, key="-MENU-")],
 				  [sg.Text("Player vs. BUTTS the Battleship game AI")],
 				  [sg.Image('assets/battleship_title.png', size=(400,200))]]
@@ -276,7 +288,7 @@ class Game:
 	'''*******************************************
 		In Game Action Methods
 	*******************************************'''
-	def attack_enemy(self, target):
+	def attack_enemy(self, target): # Player(user) controled attack on the enemy
 		try:
 			if self.player2.defend(target):
 				# GAME OVER, player win!
@@ -288,7 +300,7 @@ class Game:
 			print("Invalid target given by Player")
 			return False
 	
-	def attack_player1(self):
+	def attack_player1(self): # Attack uncontrolled (autonomous) 
 		try: 
 			if self.player1.defend(self.player2.give_target()):
 				# GAME OVER, Advanced win!
@@ -299,7 +311,7 @@ class Game:
 			print("Invalid target given by AI: Advanced")
 			return False
 			
-	def attack_player2(self):
+	def attack_player2(self): # Attack uncontrolled (autonomous) 
 		try: 
 			if self.player2.defend(self.player1.give_target()):
 				# GAME OVER, Basic win!
@@ -314,17 +326,17 @@ class Game:
 # Reminders: MUST CATCH EXCEPTIONS
 def main():
 	
-	Game.new_game(Game())
-	game = Game.get_instance()
+	Game.new_game(Game()) # Start application process
 	
 	wait = 0 # Forces the player to perform 2 actions. There is a better way to do this, but idk how yet. 
 	startcoord = -1
 	endcoord = -1
-	next = 1
+	
+	next = 1 # AI Gamemode variable only
 	
 	#Event Loop:
 	while True:
-		event, values = Game.get_instance().read()
+		event, values = Game.get_instance().window.read()
 		
 		# event = the string that represents the key of a button pressed.
 		if event == sg.WIN_CLOSED or event == "Exit Game":
@@ -334,15 +346,26 @@ def main():
 		elif event == "New Game":
 			print("New Game Pressed")
 			Game.new_game(Game.get_instance())
-		elif event == "basic":
-			Game.new_player_vs_basic(Game.get_instance())
+			
+		elif event == "restart":
+			wait = 0
+			Game.new_game(Game.get_instance())
+			
+			''' 
+			********************
+			Game Mode Selection
+			********************
+			'''
+		elif event == "basic":  
+			Game.get_instance().new_player_vs_basic()
+			
 		elif event == "advanced":
-			Game.new_player_vs_advanced(Game.get_instance())
+			Game.get_instance().new_player_vs_advanced()
+			
 		elif event == "battle":
-			Game.new_basic_vs_advanced(Game.get_instance())
-		elif event == "How To Play":
-			# Instructions on how to play (we can remove this)
-			print("Help Pressed")
+			Game.get_instance().new_basic_vs_advanced()
+		
+			'''****************'''
 		elif event == "next": # Not a player vs Ai game but an AI vs AI game. (rest of the checks pointless)
 			if next % 2 == 0:
 				Game.get_instance().attack_player1()
@@ -353,8 +376,7 @@ def main():
 			
 			next = next + 1
 			
-
-		elif event == "confirm" and wait == 0:
+		elif event == "confirm" and wait == 0: # Sends user to next stage in game. 
 			# Placed Ships
 			try:
 				Game.get_instance().next_turn() 
@@ -362,11 +384,10 @@ def main():
 				wait = 1
 			except (BoardNotCompleteException):
 				print("Missing number of ship requirements")
-		elif event == "restart":
-			wait = 0
-			Game.new_game(Game.get_instance())
+				
+
 		else:
-			if Game.get_instance().get_turn() == "position": # If turn is for placing ships. 
+			if Game.get_instance().turn == "position": # If turn is for placing ships. 
 				
 				if wait == 2 and "Player" in event:
 					startcoord = eval(event.replace("Player ", ""))
@@ -388,7 +409,7 @@ def main():
 					Game.get_instance().toggle_ship_placement_buttons(True)
 					wait = 2
 					clicked = "Game.get_instance().on_click_" + event + "_button("
-			elif Game.get_instance().get_turn() == "play": # If its player or AI turn in a player vs AI game 
+			elif Game.get_instance().turn == "play": # If its player or AI turn in a player vs AI game 
 				if wait == 1 and "Enemy" in event:
 					attack_coords = eval(event.replace("Enemy ", ""))
 					if Game.get_instance().attack_enemy(attack_coords):
