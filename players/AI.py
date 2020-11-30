@@ -20,6 +20,8 @@ class AI(Player):
 		self.triedPoints = []
 		# boardFrequency - a Dictionary of form Str:Lst[int] that stores the coordinate associated with the frequency of each ship being placed at that coordinate. Each of these numbers
 		self.boardFrequency = []
+		self.successful_hits = []
+		self.enemy_ships = 5
 		self.db = {}
 		db = Database.get_instance().connection.execute("SELECT * from Storage;")
 		for row in list(db):
@@ -54,30 +56,45 @@ class AI(Player):
 		return (random.randint(0, 9), random.randint(0,9))
 
 	def smart_target(self,opp):
-		if opp.get_knowledge():
-			print("Target Adjacent")
-			pass
-			# return target_adjacent()
+		if opp.get_knowledge() and self.enemy_ships == len(opp.get_fleet()):
+			self.successful_hits.append(eval(self.triedPoints[-1]))
+			if len(self.successful_hits)>=2:
+				self.boardFrequency = self.boardFrequency + self.driver()
+			else:
+				self.boardFrequency = self.boardFrequency + self.target_adjacent()
+		elif self.enemy_ships > len(opp.get_fleet()): # "You sunk a ship!"
+			self.enemy_ships-=1
 		optimal = self.boardFrequency.pop(-1) # Get the last item of the frequency list (has the highest odds of a ship being present)
 		print(optimal)
-		if optimal[0] not in self.triedPoints:
-			self.triedPoints.append(optimal[0])
-			return eval(optimal[0])
-		else:
-			self.smart_target()
+		while optimal[0] in self.triedPoints:
+			optimal = self.boardFrequency.pop(-1)
+		self.triedPoints.append(optimal[0])
+		return eval(optimal[0])
 
 	def target_adjacent(self):
-		previousPoint = self.triedPoints[-1]
+		previousPoint = self.successful_hits[-1]
 		nearPoints = {}
 		for shift in range(-1,2):
 			if (previousPoint[0]+shift,previousPoint[1]) not in self.triedPoints:
-				nearPoints.update({(previousPoint[0]+shift,previousPoint[1]):self.db[(previousPoint[0]+shift,previousPoint[1])]})
+				nearPoints.update({(previousPoint[0]+shift,previousPoint[1]):self.db[str((previousPoint[0]+shift,previousPoint[1]))]})
 			if (previousPoint[0],previousPoint[1]+shift) not in self.triedPoints:
-				nearPoints.update({(previousPoint[0],previousPoint[1]+shift):self.db[(previousPoint[0],previousPoint[1]+shift)]})
-		nearPoints = [k for k, v in sorted(nearPoints.items(), key=lambda item: item[1])]
+				nearPoints.update({(previousPoint[0],previousPoint[1]+shift):self.db[str((previousPoint[0],previousPoint[1]+shift))]})
+		# print('nearby are', list(nearPoints.items())[0],'\n\n\n')
+		nearPoints = [(str(k),v) for k, v in sorted(nearPoints.items(), key=lambda item: item[1][2])]
 		return nearPoints
 
-
-
-
-		pass
+	def driver(self):
+		first = self.successful_hits.pop()
+		second = self.successful_hits.pop()
+		row = []
+		for shift in range(-2,3):
+			if (first[0] == second[0]):
+				row.append((str((first[0],first[1]+shift)),self.db[str((first[0],first[1]+shift))]))
+				row.append((str((second[0],second[1]+shift)),self.db[str((second[0],second[1]+shift))]))
+			elif (first[1] == second[1]):
+				row.append((str((first[0]+shift,first[1])),self.db[str((first[0]+shift,first[1]))]))
+				row.append((str((second[0]+shift,second[1])),self.db[str((second[0]+shift,second[1]))]))
+		if len(row) == 0:
+			self.successful_hits = self.successful_hits + [second,first]
+		ordered_row = [tup for tup in sorted(row,key = lambda t : t[1][2]) if tup[0] not in self.triedPoints]
+		return ordered_row
