@@ -53,8 +53,8 @@ class AI(Player):
 	def give_target(self):
 		return (random.randint(0, 9), random.randint(0,9))
 
-	def smart_target(self):
-		if super().get_knowledge():
+	def smart_target(self,opp):
+		if opp.get_knowledge():
 			print("Target Adjacent")
 			pass
 			# return target_adjacent()
