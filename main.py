@@ -213,7 +213,7 @@ class Game:
 
 	def attack_player(self):
 		try:
-			if self.player.defend(self.enemy.give_target()):
+			if self.player.defend(self.enemy.smart_target()):
 				# GAME OVER, AI win!
 				self.turnCount+=1
 				self.game_over("AI won in {} turns!".format(self.turnCount))
