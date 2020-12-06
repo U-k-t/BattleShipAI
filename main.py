@@ -144,7 +144,6 @@ class Game:
 				self.window.FindElement("player1 " + str((row,col))).Update(disabled=value)
 				self.window.FindElement("player2 " + str((row,col))).Update(disabled=value)
 	
-	@profile
 	def update_ui(self):
 		if self.turn == "position":
 			self.window.close()
@@ -306,6 +305,7 @@ class Game:
 			if self.player1.defend(self.player2.give_target()):
 				if self.turn == "battle": # GAME OVER, Advanced win!
 					self.game_over("Advanced won!")
+					print("Advanced AI won!")
 				else:
 					self.game_over("AI won!")
 				return False	
@@ -320,6 +320,7 @@ class Game:
 			if self.player2.defend(self.player1.give_target()):
 				# GAME OVER, Basic win!
 				self.game_over("Basic won!")
+				print("Basic AI won!")
 				return False
 			return True # sucessful attack 
 		except(AlreadyPointTakenException):
@@ -335,7 +336,8 @@ def main():
 	wait = 0 # Forces the player to perform 2 actions. There is a better way to do this, but idk how yet. 
 	startcoord = -1
 	endcoord = -1
-	
+	one_count = 0
+	two_count = 0	
 	next = 1 # AI Gamemode variable only
 	
 	#Event Loop:
@@ -372,12 +374,15 @@ def main():
 			'''****************'''
 		elif event == "next": # Not a player vs Ai game but an AI vs AI game. (rest of the checks pointless)
 			if next % 2 == 0:
-				Game.get_instance().attack_player1()
+				while(not Game.get_instance().attack_player1()):
+					pass
 				Game.get_instance().update_ui()
+				one_count = one_count + 1
 			else:
-				Game.get_instance().attack_player2()
+				while(not Game.get_instance().attack_player2()):
+					pass
 				Game.get_instance().update_ui()
-			
+				two_count = two_count + 1
 			next = next + 1
 			
 		elif event == "confirm" and wait == 0: # Sends user to next stage in game. 
@@ -409,17 +414,21 @@ def main():
 					
 					Game.get_instance().update_ui()
 					
-				elif event in Game.SHIP_NAMES:
+				elif event in Game.SHIP_NAMES:					
 					Game.get_instance().toggle_ship_placement_buttons(True)
 					wait = 2
 					clicked = "Game.get_instance().on_click_" + event + "_button("
 			elif Game.get_instance().turn == "play": # If its player or AI turn in a player vs AI game 
 				if wait == 1 and "Enemy" in event:
 					attack_coords = eval(event.replace("Enemy ", ""))
+					one_count = one_count + 1
 					if Game.get_instance().attack_enemy(attack_coords):
 						# PERFORM AI TURN HERE
-						Game.get_instance().attack_player1()
+						while(not Game.get_instance().attack_player1()):
+							pass
 						Game.get_instance().update_ui()
+						two_count = two_count + 1
 
-
+	print("Player one took " + str(one_count) + " turns")
+	print("Player two took " + str(two_count) + " turns")
 main()
