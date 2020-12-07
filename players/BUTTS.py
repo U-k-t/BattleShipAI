@@ -15,6 +15,7 @@ class Advanced(AI):
 				super().target_adjacent()
 		elif self.enemy_ships > len(opp.get_fleet()): # "You sunk a ship!"
 			self.enemy_ships-=1
+			self.likely_points = [] # If we sunk a ship, our likely points default back to whatever we added to boardFrequency
 
 
 		if len(self.likely_points) >0:

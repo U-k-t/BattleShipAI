@@ -17,7 +17,6 @@ class AI(Player):
 		self.boardFrequency = []
 		self.likely_points = []
 		self.next_target = []
-		self.tried_hits = []
 		self.successful_hits = []
 		self.enemy_ships = 5
 		self.db = {}
