@@ -15,21 +15,22 @@ class AI(Player):
 		self.triedPoints = []
 		# boardFrequency - a Dictionary of form Str:Lst[int] that stores the coordinate associated with the frequency of each ship being placed at that coordinate. Each of these numbers
 		self.boardFrequency = []
+		self.likely_points = []
+		self.next_target = []
+		self.tried_hits = []
 		self.successful_hits = []
 		self.enemy_ships = 5
 		self.db = {}
 		db = Database.get_instance().get_all()
 		for row in list(db):
 			spliced = row[1:]
-			value = max(spliced)
+			value = sum(spliced)/5 # Take the Average of the Values to Create the Likely Weight
 			'''
-			(COORDINATE, LIST, MAXIMUM, SHIP_TYPE)
+			(COORDINATE, LIST, VALUE, LIKELY_SHIP_TYPE)
 			'''
-			self.boardFrequency.append((row[0],np.array(spliced),value,spliced.index(value)))
-			self.db.update({row[0]:(np.array(spliced),value,spliced.index(value))})
+			self.boardFrequency.append((eval(row[0]),np.array(spliced),value,spliced.index(max(spliced))))
+			self.db.update({eval(row[0]):(np.array(spliced),value,spliced.index(max(spliced)))})
 		self.boardFrequency.sort(key = lambda i : i[2])
-		for item in self.boardFrequency:
-			print(item)
 
 	def create_board(self):
 		self.place_patrol()
@@ -104,17 +105,19 @@ class AI(Player):
 		pass
 
 	def target_adjacent(self): # Find the nearby points in cardinal directions tp a succesful hit
+		self.boardFrequency += self.likely_points
 		previousPoint = self.successful_hits[-1]
 		nearPoints = {}
 		for shift in range(-1,2):
 			if (previousPoint[0]+shift,previousPoint[1]) not in self.triedPoints and 0>=previousPoint[0]+shift>=9:
-				nearPoints.update({(previousPoint[0]+shift,previousPoint[1]):self.db[str((previousPoint[0]+shift,previousPoint[1]))]})
+				nearPoints.update({(previousPoint[0]+shift,previousPoint[1]):self.db[(previousPoint[0]+shift,previousPoint[1])]})
 			if (previousPoint[0],previousPoint[1]+shift) not in self.triedPoints and 0>=previousPoint[1]+shift>=9:
-				nearPoints.update({(previousPoint[0],previousPoint[1]+shift):self.db[str((previousPoint[0],previousPoint[1]+shift))]})
-		nearPoints = [(str(k),v) for k, v in sorted(nearPoints.items(), key=lambda item: item[1][2])] # Order the adjacent points by their value
-		return nearPoints
+				nearPoints.update({(previousPoint[0],previousPoint[1]+shift):self.db[(previousPoint[0],previousPoint[1]+shift)]})
+		nearPoints = [(k,v) for k, v in sorted(nearPoints.items(), key=lambda item: item[1][2])] # Order the adjacent points by their value
+		self.likely_points =  nearPoints
 
 	def driver(self): # If the top two points of the stack are in the same row or column, find the points in that grouping.
+		self.likely_points = []
 		first = self.successful_hits.pop()
 		second = self.successful_hits.pop()
 		row = []
@@ -122,12 +125,12 @@ class AI(Player):
 			x_values = [first[0]+shift,second[0]+shift]
 			y_values = [first[1]+shift,second[1]+shift]
 			if (first[0] == second[0]) and not any(y<0 for y in y_values) and not any(y>9 for y in y_values):
-				row.append((str((first[0],y_values[0])),self.db[str((first[0],y_values[0]))]))
-				row.append((str((second[0],y_values[1])),self.db[str((second[0],y_values[1]))]))
+				row.append(((first[0],y_values[0]),self.db[(first[0],y_values[0])]))
+				row.append(((second[0],y_values[1]),self.db[(second[0],y_values[1])]))
 			elif (first[1] == second[1]) and not any(x<0 for x in x_values) and not any(x>9 for x in x_values):
-				row.append((str((x_values[0],first[1])),self.db[str((x_values[0],first[1]))]))
-				row.append((str((x_values[1],second[1])),self.db[str((x_values[1],second[1]))]))
+				row.append(((x_values[0],first[1]),self.db[(x_values[0],first[1])]))
+				row.append(((x_values[1],second[1]),self.db[(x_values[1],second[1])]))
 		if len(row) == 0:
 			self.successful_hits = self.successful_hits + [second,first]
 		ordered_row = [tup for tup in sorted(row,key = lambda t : t[1][2]) if tup[0] not in self.triedPoints] # Order Adjacent Points by Value
-		return ordered_row
+		self.likely_points =  ordered_row
