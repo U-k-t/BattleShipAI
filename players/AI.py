@@ -18,7 +18,7 @@ class AI(Player):
 		self.successful_hits = []
 		self.enemy_ships = 5
 		self.db = {}
-		db = Database.get_instance().connection.execute("SELECT * from Storage;")
+		db = Database.get_instance().get_all()
 		for row in list(db):
 			spliced = row[1:]
 			value = max(spliced)
