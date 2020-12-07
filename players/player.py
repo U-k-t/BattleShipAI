@@ -45,9 +45,9 @@ class Player:
 			if not flag:
 				for position in new_ship.get_coord():
 					self._board[position[0]][position[1]] = new_ship.get_token()
-			return True	
+			return True
 		except (InvalidShipPlacementException, ShipAlreadyExistsException) as ex:
-			print("exception thrown, halt program :" + str(ex) ) # Temporary action. 
+			print("exception thrown, halt program :" + str(ex) ) # Temporary action.
 			return False
 
 	# Returns True if this player lost. (GAME OVER)

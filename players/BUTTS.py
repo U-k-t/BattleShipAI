@@ -4,8 +4,8 @@ class Advanced(AI):
 
 	def __init__(self):
 		super().__init__()
-		
-	def give_target(self, opp): # Targets based off of knowledge from the database 
+
+	def give_target(self, opp): # Targets based off of knowledge from the database
 		if opp.get_knowledge() and self.enemy_ships == len(opp.get_fleet()): # If opponent indicated last fire was a hit and no ships have sunk
 			self.successful_hits.append(eval(self.triedPoints[-1])) # Record the last succesful hit
 			if len(self.successful_hits)>=2: # See if there are two hits in a row that we can follow the row of
