@@ -9,30 +9,36 @@ from battleship.ships import Ship
 	- Manages the player's board arangement
 *****************************************************************'''
 class Player:
-	
+
 	BOARD_SIZE = 10
-	
+
 	def __init__(self):
 		# Init a blank board (2D array of images as a base64)
-		self._board = [[ImageRepository.get_empty_image() for col in range(Player.BOARD_SIZE)] for row in range(Player.BOARD_SIZE)]
-	   
-		self._fleet = Fleet() # Fleet of ships initialized
-		
+
+		self.board = [[ImageRepository.get_empty_image() for col in range(Player.BOARD_SIZE)] for row in range(Player.BOARD_SIZE)]
+
+		self.fleet = Fleet() # Fleet of ships initialized
+
+		self.knowledge_hit = False # The player's knowledge if the previous hit was successful
+
 	def get_board(self):
-		return self._board
-	
+		return self.board
+
 	def get_fleet(self):
-		return self._fleet.get_ships()
-	
+		return self.fleet.get_ships()
+
+	def get_knowledge(self):
+		return self.knowledge_hit
+
 	'''*************************************************************
 		Action Methods:
 	*************************************************************'''
 	def finish_board_placement(self):
-		return self._fleet.is_valid_fleet()
+		return self.fleet.is_valid_fleet()
 
 	def place_ship(self, new_ship, flag):
 		try:
-			replaced_coords = self._fleet.add_ship(new_ship) # if return None: Did not replace. 
+			replaced_coords = self.fleet.add_ship(new_ship) # if return None: Did not replace.
 			if replaced_coords != None:
 				for coord in replaced_coords:
 					self._board[coord[0]][coord[1]] = ImageRepository.get_empty_image()
@@ -43,14 +49,16 @@ class Player:
 		except (InvalidShipPlacementException, ShipAlreadyExistsException) as ex:
 			print("exception thrown, halt program :" + str(ex) ) # Temporary action. 
 			return False
- 	
-	# Returns True if this player lost. (GAME OVER)	
-	def defend(self, coords): # THIS IS IF THE ENEMY OF THIS CURRENT OBJECT IS FIRING. 
-		if self._board[coords[0]][coords[1]] == ImageRepository.get_hit_image() or self._board[coords[0]][coords[1]] == ImageRepository.get_miss_image():
+
+	# Returns True if this player lost. (GAME OVER)
+	def defend(self, coords): # THIS IS IF THE ENEMY OF THIS CURRENT OBJECT IS FIRING.
+		if self.board[coords[0]][coords[1]] == ImageRepository.get_hit_image() or self.board[coords[0]][coords[1]] == ImageRepository.get_miss_image():
 			raise AlreadyPointTakenException("(other) player has already attempted an attack on this (row,col) point")
-		elif self._fleet.check_for_damage(coords): # If the hit is taken, change the board image at current position to an X (hit)
-			self._board[coords[0]][coords[1]] = ImageRepository.get_hit_image()
+		elif self.fleet.check_for_damage(coords): # If the hit is taken, change the board image at current position to an X (hit)
+			self.board[coords[0]][coords[1]] = ImageRepository.get_hit_image()
+			self.knowledge_hit = True
 		else: # If the hit was not taken, change the board image at current position to an O (miss)
-			self._board[coords[0]][coords[1]] = ImageRepository.get_miss_image()
-		
-		return self._fleet.is_empty() # returns true if CURRENT object lost
+			self.board[coords[0]][coords[1]] = ImageRepository.get_miss_image()
+			self.knowledge_hit = False
+
+		return self.fleet.is_empty() # returns true if CURRENT object lost
