@@ -308,7 +308,7 @@ class Game:
 					print("Advanced AI won!")
 				else:
 					self.game_over("AI won!")
-				return False
+				return True
 
 			return True # sucessful attack
 		except(AlreadyPointTakenException):
@@ -321,7 +321,6 @@ class Game:
 				# GAME OVER, Basic win!
 				self.game_over("Basic won!")
 				print("Basic AI won!")
-				return False
 			return True # sucessful attack
 		except(AlreadyPointTakenException):
 			print("Invalid target given by AI: Basic")
@@ -377,10 +376,8 @@ def main():
 				pass
 			while(not Game.get_instance().attack_player2()):
 				pass
-			Game.get_instance().update_ui()
 			one_count = one_count + 1
 			two_count = two_count + 1
-			Game.get_instance().update_ui()
 
 		elif event == "confirm" and wait == 0: # Sends user to next stage in game.
 			# Placed Ships
