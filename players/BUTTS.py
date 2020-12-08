@@ -11,6 +11,7 @@ class Advanced(AI):
 		self.name = 'Advanced'
 		db = Database.get_instance().get_all()
 		games = Database.get_instance().get_games_played()
+		games = 1 if games == 0 else games
 		for row in list(db):
 			spliced = [x/games for x in row[1:]]
 			value = sum(spliced)/5 # Take the Average of the Values to Create the Likely Weight
