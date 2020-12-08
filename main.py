@@ -380,6 +380,7 @@ def main():
 				pass
 			one_count = one_count + 1
 			two_count = two_count + 1
+			Game.get_instance().update_ui()
 
 		elif event == "confirm" and wait == 0: # Sends user to next stage in game.
 			# Placed Ships

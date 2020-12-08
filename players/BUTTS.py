@@ -12,16 +12,16 @@ class Advanced(AI):
 			if len(self.successful_hits)>=2: # See if there are two hits in a row that we can follow the row of
 				self.likely_points =  super().driver()
 				print(self.likely_points)
-			else: # Otherwise, get the adjacent squares
+			elif not self.likely_points[0]: # Otherwise, get the adjacent squares
 				self.likely_points =  super().target_adjacent()
 				print(self.likely_points)
 		elif self.enemy_ships > len(opp.get_fleet()): # "You sunk a ship!"
 			self.enemy_ships-=1
-			self.likely_points = [] # If we sunk a ship, our likely points default back to whatever we added to boardFrequency
+			self.likely_points = [False] # If we sunk a ship, our likely points default back to whatever we added to boardFrequency
 
 
-		if len(self.likely_points) >0:
-			self.next_target = self.boardFrequency+self.likely_points
+		if len(self.likely_points) >1:
+			self.next_target = self.boardFrequency+self.likely_points[1:]
 			print("Target Likely")
 		else:
 			self.next_target = self.boardFrequency

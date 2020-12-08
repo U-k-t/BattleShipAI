@@ -14,7 +14,7 @@ class AI(Player):
 		self.triedPoints = []
 		# boardFrequency - a Dictionary of form Str:Lst[int] that stores the coordinate associated with the frequency of each ship being placed at that coordinate. Each of these numbers
 		self.boardFrequency = []
-		self.likely_points = []
+		self.likely_points = [False]
 		self.next_target = []
 		self.successful_hits = []
 		self.enemy_ships = 5
@@ -103,7 +103,7 @@ class AI(Player):
 		pass
 
 	def target_adjacent(self): # Find the nearby points in cardinal directions tp a succesful hit
-		self.boardFrequency += self.likely_points
+		self.boardFrequency += self.likely_points[1:]
 		previousPoint = self.successful_hits[-1]
 		nearPoints = {}
 		for shift in range(-1,2):
@@ -111,7 +111,7 @@ class AI(Player):
 				nearPoints.update({(previousPoint[0]+shift,previousPoint[1]):self.db[(previousPoint[0]+shift,previousPoint[1])]})
 			if (previousPoint[0],previousPoint[1]+shift) not in self.triedPoints and 0<=previousPoint[1]+shift<=9:
 				nearPoints.update({(previousPoint[0],previousPoint[1]+shift):self.db[(previousPoint[0],previousPoint[1]+shift)]})
-		nearPoints = [(k,v) for k, v in sorted(nearPoints.items())] # Order the adjacent points by their value
+		nearPoints = [False] + [(k,v) for k, v in sorted(nearPoints.items())] # Order the adjacent points by their value
 		# , key=lambda item: item[1][2]
 		return(nearPoints)
 
@@ -131,6 +131,6 @@ class AI(Player):
 				row.append(((x_values[1],second[1]),self.db[(x_values[1],second[1])]))
 		if len(row) == 0:
 			self.successful_hits = self.successful_hits + [second,first]
-		ordered_row = [tup for tup in sorted(row) if tup[0] not in self.triedPoints] # Order Adjacent Points by Value
+		ordered_row = [True] + [tup for tup in sorted(row) if tup[0] not in self.triedPoints] # Order Adjacent Points by Value
 		# ,key = lambda t : t[1][2]
 		return(ordered_row)
