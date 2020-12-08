@@ -112,7 +112,7 @@ class Game:
 		
 		# Print Out Statistics:
 		print("\n\n*********************************\n")
-		print("Statisitics:\n Who Won? " + self.who_won + "\n Player 1 turn count: " + str(self.player1turns) + "\n Player 2 turn count: " + str(self.player2turns))
+		print("Statisitics:\n Who Won? " + str(self.whowon) + "\n Player 1 turn count: " + str(self.player1turns) + "\n Player 2 turn count: " + str(self.player2turns))
 		print("*********************************\n")
 		
 	def next_turn(self): # sends to the next play (Used only in player vs AI games)
@@ -326,9 +326,11 @@ class Game:
 				if self.turn == "play": # GAME OVER, Advanced win!
 					self.game_over("AI won!")
 					print("AI won!")
+					self.whowon = "AI"
 				else:
 					self.game_over("Advanced won!")
 					print("Advanced AI won!")
+					self.whowon = "Advanced AI"
 				self.turn = "over"
 			self.player2turns = self.player2turns + 1
 			return True # sucessful attack
@@ -343,6 +345,7 @@ class Game:
 				self.game_over("Basic won!")
 				print("Basic AI won!")
 			self.player1turns = self.player1turns + 1
+			self.whowon = "Basic AI"
 			return True # sucessful attack
 		except(AlreadyPointTakenException):
 			print("Invalid target given by AI: Basic")
