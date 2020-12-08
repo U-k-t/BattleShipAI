@@ -96,13 +96,18 @@ class AI(Player):
 				target = self.get_optimal()
 			else: # If Hit and Didn't Sink
 				print("{}: Hit, Did Not Sink".format(self.name))
-				if self.triedPoints[-1] in self.successful_hits:
-					target = self.reverse_direction()
-				else:
+				if not self.triedPoints[-1] in self.successful_hits:
 					self.successful_hits.append(self.triedPoints[-1])
 					self.found_point = True
-					target = self.sink_ship()
-
+				target = self.sink_ship()
+				previous = self.successful_hits[-1]
+				surrounding = [(previous[0]+x, previous[1]) for x in range(-1,2) if 0<=previous[0]+x<=9] + [(previous[0], previous[1]+y) for y in range(-1,2) if 0<=previous[1]+y<=9]
+				if(set(surrounding).issubset(set(self.triedPoints))):
+					print("{}: is_subset")
+					target = self.reverse_direction()
+				else:
+					while target in self.triedPoints:
+						target = self.sink_ship()
 		else:
 			if len(self.successful_hits) >= 2: # If reaches end of ship and miss
 				target = self.reverse_direction()
@@ -114,7 +119,10 @@ class AI(Player):
 				surrounding = [(previous[0]+x, previous[1]) for x in range(-1,2) if 0<=previous[0]+x<=9] + [(previous[0], previous[1]+y) for y in range(-1,2) if 0<=previous[1]+y<=9]
 				if(set(surrounding).issubset(set(self.triedPoints))):
 					print("is_subset")
-					target = self.get_optimal()
+					target = self.reverse_direction()
+				else:
+					while target in self.triedPoints:
+						target = self.sink_ship()
 			else: # If Miss
 				self.successful_hits = []
 				target = self.get_optimal()
@@ -143,6 +151,7 @@ class AI(Player):
 
 	def get_directions(self,coords,direction):
 		print("coords: ", coords, " direction, ", direction)
+		direction2 = direction
 		directions = {
 		1: (-1,0),
 		2: (0,1),
@@ -151,13 +160,28 @@ class AI(Player):
 		}
 		move = directions[direction]
 		target = (coords[0]+move[0], coords[1]+move[1])
+		while target in self.triedPoints or not is_valid(target):
+			direction2+=1
+			if direction2 >=5:
+				direction2 = 1
+			if direction2 == direction:
+				return self.get_optimal()
+			move = directions[direction2]
+			target = (coords[0]+move[0], coords[1]+move[1])
+
+
 		return target
+
 	def reverse_direction(self):
 		print("{}: Turning Around".format(self.name))
 		self.successful_hits = [self.successful_hits[0]]
 		self.direction += 1 # Reverse Our Direction By Incrementing a Total of Two Times
 		self.found_point = False
 		target = self.sink_ship()
-		if target in self.triedPoints:
+		if target in self.triedPoints or not is_valid(target):
 			target = self.get_optimal()
 		return target
+
+
+def is_valid(tup):
+	return (0<=tup[0]<=9 and 0<=tup[1]<=9)

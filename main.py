@@ -402,7 +402,7 @@ def main():
 				pass
 			while(not Game.get_instance().attack_player2()):
 				pass
-			Game.get_instance().update_ui()
+			# Game.get_instance().update_ui()
 
 		elif event == "confirm" and wait == 0: # Sends user to next stage in game.
 			# Placed Ships
@@ -440,7 +440,6 @@ def main():
 			elif Game.get_instance().turn == "play": # If its player or AI turn in a player vs AI game
 				if wait == 1 and "Enemy" in event:
 					attack_coords = eval(event.replace("Enemy ", ""))
-					one_count = one_count + 1
 					if Game.get_instance().attack_enemy(attack_coords):
 						# PERFORM AI TURN HERE
 						while(not Game.get_instance().attack_player1()):
