@@ -45,3 +45,6 @@ class Database:
 			for coord in ship.get_coord():
 				self.update(coord, ship.get_name())
 
+
+	def get_all(self):
+		return self._connection.execute("SELECT * from Storage;")
