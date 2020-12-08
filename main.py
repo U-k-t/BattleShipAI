@@ -331,10 +331,10 @@ class Game:
 					self.game_over("Advanced won!")
 					print("Advanced AI won!")
 					self.whowon = "Advanced AI"
-				self.turn = "over"
+			self.turn = "over"
 			self.player2turns = self.player2turns + 1
 			return True # sucessful attack
-		except(AlreadyPointTakenException):
+		except(AlreadyPointTakenException,InvalidCoordinateException):
 			print("Invalid target given by AI")
 			return False
 
@@ -346,10 +346,12 @@ class Game:
 				print("Basic AI won!")
 			self.player1turns = self.player1turns + 1
 			self.whowon = "Basic AI"
+			self.turn = "over"
 			return True # sucessful attack
-		except(AlreadyPointTakenException):
+		except(AlreadyPointTakenException, InvalidCoordinateException):
 			print("Invalid target given by AI: Basic")
 			return False
+
 
 
 # Reminders: MUST CATCH EXCEPTIONS
@@ -403,6 +405,7 @@ def main():
 				pass
 			one_count = one_count + 1
 			two_count = two_count + 1
+			Game.get_instance().update_ui()
 
 		elif event == "confirm" and wait == 0: # Sends user to next stage in game.
 			# Placed Ships
