@@ -33,7 +33,10 @@ class Game:
 		self.player1 = None
 		self.player2 = None
 		self.turn = None
-
+    
+		self.player1turns = 0
+		self.player2turns = 0
+		self.whowon = None
 		self.window =  None
 
 	@staticmethod #retrieves the current instance
@@ -49,7 +52,8 @@ class Game:
 		else:
 			if self.window != None:
 				self.window.close()
-
+		
+		
 		self.window = sg.Window("Battleship", self.create_init_menu_layout(), icon = "assets/battleship.ico", margins = (30, 30))
 
 
@@ -67,6 +71,9 @@ class Game:
 		self.window.close()
 		self.window = sg.Window("Battleship", self.create_ship_placement_layout(), icon = "assets/battleship.ico", margins = (30, 30))
 		self.player2.create_board()
+		self.player1turns = 0
+		self.player2turns = 0
+		self.whowon = None
 
 
 	def new_player_vs_advanced(self): # initializes the game variables and window to match the style of game.
@@ -78,6 +85,9 @@ class Game:
 		self.window.close()
 		self.window = sg.Window("Battleship", self.create_ship_placement_layout(), icon = "assets/battleship.ico", margins = (30, 30))
 		self.player2.create_board()
+		self.player1turns = 0
+		self.player2turns = 0
+		self.whowon = None
 
 
 	def new_basic_vs_advanced(self): # initializes the game variables and window to match the style of game.
@@ -91,11 +101,20 @@ class Game:
 		self.window.close()
 		self.window = sg.Window("Battleship", self.create_ai_battle_layout(), icon = "assets/battleship.ico", margins = (30, 30), finalize=True)
 		self.toggle_both_board_buttons(True)
+		self.player1turns = 0
+		self.player2turns = 0
+		self.whowon = None
 
 	def game_over(self, who_won): # Ends a game that the user plays but not the application process.
 		self.window.close()
 		self.window = sg.Window("Battleship", self.create_game_over_layout(who_won), icon = "assets/battleship.ico", margins = (30, 30), finalize=True)
-
+		Database.get_instance().update_game()
+		
+		# Print Out Statistics:
+		print("\n\n*********************************\n")
+		print("Statistics:\n Who Won? " + str(self.whowon) + "\n Player 1 turn count: " + str(self.player1turns) + "\n Player 2 turn count: " + str(self.player2turns))
+		print("*********************************\n")
+		
 	def next_turn(self): # sends to the next play (Used only in player vs AI games)
 		if self.turn == "position":
 			if self.player1.finish_board_placement():
@@ -295,6 +314,7 @@ class Game:
 				print("Player won!")
 				self.game_over("player won!")
 				return False
+			self.player1turns = self.player1turns + 1
 			return True # sucessful attack
 		except(AlreadyPointTakenException):
 			print("Invalid target given by Player")
@@ -306,12 +326,13 @@ class Game:
 				if self.turn == "play": # GAME OVER, Advanced win!
 					self.game_over("AI won!")
 					print("AI won!")
+					self.whowon = "AI"
 				else:
 					self.game_over("Advanced won!")
 					print("Advanced AI won!")
-				self.turn = "over"
-				return True
-
+					self.whowon = "Advanced AI"
+			self.turn = "over"
+			self.player2turns = self.player2turns + 1
 			return True # sucessful attack
 		except(AlreadyPointTakenException,InvalidCoordinateException):
 			print("Invalid target given by AI")
@@ -323,7 +344,9 @@ class Game:
 				# GAME OVER, Basic win!
 				self.game_over("Basic won!")
 				print("Basic AI won!")
-				self.turn = "over"
+			self.player1turns = self.player1turns + 1
+			self.whowon = "Basic AI"
+			self.turn = "over"
 			return True # sucessful attack
 		except(AlreadyPointTakenException, InvalidCoordinateException):
 			print("Invalid target given by AI: Basic")
