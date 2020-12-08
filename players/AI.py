@@ -1,6 +1,5 @@
 from exceptions.exception import * # All the Exception Classes
 from players.player import Player
-from players.database import Database
 from battleship.fleet import Fleet
 from battleship.ships import *
 
@@ -12,26 +11,10 @@ class AI(Player):
 		super().__init__()
 		# triedPoints - a list of tuples representing the points already tried
 		self.triedPoints = []
-		# boardFrequency - a Dictionary of form Str:Lst[int] that stores the coordinate associated with the frequency of each ship being placed at that coordinate. Each of these numbers
-		self.boardFrequency = []
-		# self.likely_points = [False]
-		# self.next_target = []
 		self.successful_hits = []
 		self.enemy_ships = 5
 		self.direction=1
 		self.found_point = False
-		self.db = {}
-		db = Database.get_instance().get_all()
-		for row in list(db):
-			spliced = row[1:]
-			value = sum(spliced)/5 # Take the Average of the Values to Create the Likely Weight
-			'''
-			(COORDINATE, LIST, VALUE, LIKELY_SHIP_TYPE)
-			'''
-			self.boardFrequency.append((eval(row[0]),spliced,value,spliced.index(max(spliced))))
-			self.db.update({eval(row[0]):(spliced,value,spliced.index(max(spliced)))})
-		self.boardFrequency.sort(key = lambda i : i[2])
-
 	def create_board(self):
 		self.place_patrol()
 		self.place_submarine()
@@ -113,28 +96,15 @@ class AI(Player):
 			else: # If Hit and Didn't Sink
 				print("ADVANCED: Hit, Did Not Sink")
 				if self.triedPoints[-1] in self.successful_hits:
-					self.successful_hits = [self.successful_hits[0]]
-					self.direction+=1
-					self.found_point = False
+					target = self.reverse_direction()
 				else:
 					self.successful_hits.append(self.triedPoints[-1])
 					self.found_point = True
-				target = self.sink_ship()
-				previous = self.successful_hits[-1]
-				surrounding = [(previous[0]+x, previous[1]) for x in range(-1,2) if 0<=previous[0]+x<=9] + [(previous[0], previous[1]+y) for y in range(-1,2) if 0<=previous[1]+y<=9]
-				if(set(surrounding).issubset(set(self.triedPoints))):
-					print("is_subset")
-					target = self.get_optimal()
+					target = self.sink_ship()
 
 		else:
 			if len(self.successful_hits) >= 2: # If reaches end of ship and miss
-				print("ADVANCED: Turning Around")
-				self.successful_hits = [self.successful_hits[0]]
-				self.direction += 1 # Reverse Our Direction By Incrementing a Total of Two Times
-				self.found_point = False
-				target = self.sink_ship()
-				if target in self.triedPoints:
-					target = self.get_optimal()
+				target = self.reverse_direction()
 
 			elif self.found_point: # If miss while trying a point to find direction
 				print("ADVANCED: Trying Other Adjacent Points")
@@ -143,8 +113,7 @@ class AI(Player):
 				surrounding = [(previous[0]+x, previous[1]) for x in range(-1,2) if 0<=previous[0]+x<=9] + [(previous[0], previous[1]+y) for y in range(-1,2) if 0<=previous[1]+y<=9]
 				if(set(surrounding).issubset(set(self.triedPoints))):
 					print("is_subset")
-					target = self.get_optimal()
-
+					target = self.reverse_direction()
 			else: # If Miss
 				self.successful_hits = []
 				target = self.get_optimal()
@@ -181,4 +150,13 @@ class AI(Player):
 		}
 		move = directions[direction]
 		target = (coords[0]+move[0], coords[1]+move[1])
+		return target
+	def reverse_direction(self):
+		print("ADVANCED: Turning Around")
+		self.successful_hits = [self.successful_hits[0]]
+		self.direction += 1 # Reverse Our Direction By Incrementing a Total of Two Times
+		self.found_point = False
+		target = self.sink_ship()
+		if target in self.triedPoints:
+			target = self.get_optimal()
 		return target
