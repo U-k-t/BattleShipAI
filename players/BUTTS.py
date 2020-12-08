@@ -21,12 +21,12 @@ class Advanced(AI):
 
 
 		if len(self.likely_points) >0:
-			self.next_target = self.likely_points
+			self.next_target = self.boardFrequency+self.likely_points
 			print("Target Likely")
 		else:
 			self.next_target = self.boardFrequency
 		optimal = self.next_target.pop(-1) # Get the last item of the frequency list (has the highest odds of a ship being present)
-		while optimal[0] in self.triedPoints:
+		while optimal[0] in self.triedPoints and len(self.next_target)>0:
 			optimal = self.next_target.pop(-1)
 		self.triedPoints.append(optimal[0])
 		print("Next Target is ", optimal[0])
