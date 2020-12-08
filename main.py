@@ -308,6 +308,7 @@ class Game:
 					print("Advanced AI won!")
 				else:
 					self.game_over("AI won!")
+				self.turn = "over"
 				return True
 
 			return True # sucessful attack
