@@ -15,6 +15,7 @@ class AI(Player):
 		self.enemy_ships = 5
 		self.direction=1
 		self.found_point = False
+		self.name = 'AI'
 	def create_board(self):
 		self.place_patrol()
 		self.place_submarine()
@@ -88,13 +89,13 @@ class AI(Player):
 
 		if opp.get_knowledge():
 			if self.enemy_ships > len(opp.get_fleet()): # If Hit and Sunk
-				print("ADVANCED: Sunk an Enemy Ship")
+				print("{}: Sunk an Enemy Ship".format(self.name))
 				self.enemy_ships -= 1
 				self.found_point = False
 				self.successful_hits = []
 				target = self.get_optimal()
 			else: # If Hit and Didn't Sink
-				print("ADVANCED: Hit, Did Not Sink")
+				print("{}: Hit, Did Not Sink".format(self.name))
 				if self.triedPoints[-1] in self.successful_hits:
 					target = self.reverse_direction()
 				else:
@@ -107,19 +108,19 @@ class AI(Player):
 				target = self.reverse_direction()
 
 			elif self.found_point: # If miss while trying a point to find direction
-				print("ADVANCED: Trying Other Adjacent Points")
+				print("{}: Trying Other Adjacent Points".format(self.name))
 				target = self.sink_ship()
 				previous = self.successful_hits[-1]
 				surrounding = [(previous[0]+x, previous[1]) for x in range(-1,2) if 0<=previous[0]+x<=9] + [(previous[0], previous[1]+y) for y in range(-1,2) if 0<=previous[1]+y<=9]
 				if(set(surrounding).issubset(set(self.triedPoints))):
 					print("is_subset")
-					target = self.reverse_direction()
+					target = self.get_optimal()
 			else: # If Miss
 				self.successful_hits = []
 				target = self.get_optimal()
 				self.found_point = False
 
-		print("ADVANCED: Target is: ", target)
+		print("{}: Target is: ".format(self.name), target)
 
 		if any(v>9 for v in target) or any(v<0 for v in target):
 			raise InvalidCoordinateException("BAD COORDINATE")
@@ -152,7 +153,7 @@ class AI(Player):
 		target = (coords[0]+move[0], coords[1]+move[1])
 		return target
 	def reverse_direction(self):
-		print("ADVANCED: Turning Around")
+		print("{}: Turning Around".format(self.name))
 		self.successful_hits = [self.successful_hits[0]]
 		self.direction += 1 # Reverse Our Direction By Incrementing a Total of Two Times
 		self.found_point = False

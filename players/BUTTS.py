@@ -8,6 +8,7 @@ class Advanced(AI):
 		# boardFrequency - a Dictionary of form Str:Lst[int] that stores the coordinate associated with the frequency of each ship being placed at that coordinate. Each of these numbers
 		self.boardFrequency = []
 		self.db = {}
+		self.name = 'Advanced'
 		db = Database.get_instance().get_all()
 		games = Database.get_instance().get_games_played()
 		for row in list(db):
