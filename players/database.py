@@ -26,7 +26,14 @@ class Database:
 	
 	def get_value(self, coord, ship_name):
 		return int(self._connection.execute("SELECT {} FROM Storage WHERE coord = \"{}\"".format(ship_name, str(coord))).fetchone()[0])
+        
+	def update_game(self):
+		self._connection.execute("UPDATE History SET game = game + 1")
+		self._connection.commit()
 	
+	def get_games_played(self):
+		return int(self.connection.execute("SELECT * FROM History").fetchone()[0])
+    
 	def update(self, coord, ship_name):
 		value = self.get_value(coord, ship_name)
 		value = value + 1
