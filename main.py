@@ -313,7 +313,7 @@ class Game:
 				return True
 
 			return True # sucessful attack
-		except(AlreadyPointTakenException):
+		except(AlreadyPointTakenException,InvalidCoordinateException):
 			print("Invalid target given by AI")
 			return False
 
@@ -323,10 +323,12 @@ class Game:
 				# GAME OVER, Basic win!
 				self.game_over("Basic won!")
 				print("Basic AI won!")
+				self.turn = "over"
 			return True # sucessful attack
-		except(AlreadyPointTakenException):
+		except(AlreadyPointTakenException, InvalidCoordinateException):
 			print("Invalid target given by AI: Basic")
 			return False
+
 
 
 # Reminders: MUST CATCH EXCEPTIONS
