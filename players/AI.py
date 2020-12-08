@@ -3,7 +3,6 @@ from players.player import Player
 from players.database import Database
 from battleship.fleet import Fleet
 from battleship.ships import *
-import numpy as np
 
 import random
 
@@ -27,8 +26,8 @@ class AI(Player):
 			'''
 			(COORDINATE, LIST, VALUE, LIKELY_SHIP_TYPE)
 			'''
-			self.boardFrequency.append((eval(row[0]),np.array(spliced),value,spliced.index(max(spliced))))
-			self.db.update({eval(row[0]):(np.array(spliced),value,spliced.index(max(spliced)))})
+			self.boardFrequency.append((eval(row[0]),spliced,value,spliced.index(max(spliced))))
+			self.db.update({eval(row[0]):(spliced,value,spliced.index(max(spliced)))})
 		self.boardFrequency.sort(key = lambda i : i[2])
 
 	def create_board(self):
