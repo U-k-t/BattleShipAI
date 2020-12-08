@@ -111,7 +111,8 @@ class AI(Player):
 				nearPoints.update({(previousPoint[0]+shift,previousPoint[1]):self.db[(previousPoint[0]+shift,previousPoint[1])]})
 			if (previousPoint[0],previousPoint[1]+shift) not in self.triedPoints and 0<=previousPoint[1]+shift<=9:
 				nearPoints.update({(previousPoint[0],previousPoint[1]+shift):self.db[(previousPoint[0],previousPoint[1]+shift)]})
-		nearPoints = [(k,v) for k, v in sorted(nearPoints.items(), key=lambda item: item[1][2])] # Order the adjacent points by their value
+		nearPoints = [(k,v) for k, v in sorted(nearPoints.items())] # Order the adjacent points by their value
+		# , key=lambda item: item[1][2]
 		return(nearPoints)
 
 	def driver(self): # If the top two points of the stack are in the same row or column, find the points in that grouping.
@@ -130,5 +131,6 @@ class AI(Player):
 				row.append(((x_values[1],second[1]),self.db[(x_values[1],second[1])]))
 		if len(row) == 0:
 			self.successful_hits = self.successful_hits + [second,first]
-		ordered_row = [tup for tup in sorted(row,key = lambda t : t[1][2]) if tup[0] not in self.triedPoints] # Order Adjacent Points by Value
+		ordered_row = [tup for tup in sorted(row) if tup[0] not in self.triedPoints] # Order Adjacent Points by Value
+		# ,key = lambda t : t[1][2]
 		return(ordered_row)
