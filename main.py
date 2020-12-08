@@ -332,7 +332,7 @@ class Game:
 					self.game_over("Advanced won!")
 					print("Advanced AI won!")
 					self.whowon = "Advanced AI"
-			self.turn = "over"
+				self.turn = "over"
 			self.player2turns = self.player2turns + 1
 			return True # sucessful attack
 		except(AlreadyPointTakenException,InvalidCoordinateException):
@@ -345,9 +345,9 @@ class Game:
 				# GAME OVER, Basic win!
 				self.game_over("Basic won!")
 				print("Basic AI won!")
+				self.whowon = "Basic AI"
+				self.turn = "over"
 			self.player1turns = self.player1turns + 1
-			self.whowon = "Basic AI"
-			self.turn = "over"
 			return True # sucessful attack
 		except(AlreadyPointTakenException, InvalidCoordinateException):
 			print("Invalid target given by AI: Basic")
