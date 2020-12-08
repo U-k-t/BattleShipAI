@@ -120,9 +120,14 @@ class AI(Player):
 					self.successful_hits.append(self.triedPoints[-1])
 					self.found_point = True
 				target = self.sink_ship()
+				previous = self.successful_hits[-1]
+				surrounding = [(previous[0]+x, previous[1]) for x in range(-1,2) if 0<=previous[0]+x<=9] + [(previous[0], previous[1]+y) for y in range(-1,2) if 0<=previous[1]+y<=9]
+				if(set(surrounding).issubset(set(self.triedPoints))):
+					print("is_subset")
+					target = self.get_optimal()
 
 		else:
-			if not opp.get_knowledge() and len(self.successful_hits) >= 2: # If reaches end of ship and miss
+			if len(self.successful_hits) >= 2: # If reaches end of ship and miss
 				print("ADVANCED: Turning Around")
 				self.successful_hits = [self.successful_hits[0]]
 				self.direction += 1 # Reverse Our Direction By Incrementing a Total of Two Times
@@ -134,6 +139,12 @@ class AI(Player):
 			elif self.found_point: # If miss while trying a point to find direction
 				print("ADVANCED: Trying Other Adjacent Points")
 				target = self.sink_ship()
+				previous = self.successful_hits[-1]
+				surrounding = [(previous[0]+x, previous[1]) for x in range(-1,2) if 0<=previous[0]+x<=9] + [(previous[0], previous[1]+y) for y in range(-1,2) if 0<=previous[1]+y<=9]
+				if(set(surrounding).issubset(set(self.triedPoints))):
+					print("is_subset")
+					target = self.get_optimal()
+
 			else: # If Miss
 				self.successful_hits = []
 				target = self.get_optimal()
