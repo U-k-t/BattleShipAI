@@ -303,11 +303,12 @@ class Game:
 	def attack_player1(self): # Attack uncontrolled (autonomous)
 		try:
 			if self.player1.defend(self.player2.give_target(self.player1)):
-				if self.turn == "battle": # GAME OVER, Advanced win!
+				if self.turn == "play": # GAME OVER, Advanced win!
+					self.game_over("AI won!")
+					print("AI won!")
+				else:
 					self.game_over("Advanced won!")
 					print("Advanced AI won!")
-				else:
-					self.game_over("AI won!")
 				self.turn = "over"
 				return True
 
