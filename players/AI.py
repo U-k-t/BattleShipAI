@@ -108,12 +108,12 @@ class AI(Player):
 		previousPoint = self.successful_hits[-1]
 		nearPoints = {}
 		for shift in range(-1,2):
-			if (previousPoint[0]+shift,previousPoint[1]) not in self.triedPoints and 0>=previousPoint[0]+shift>=9:
+			if (previousPoint[0]+shift,previousPoint[1]) not in self.triedPoints and 0<=previousPoint[0]+shift<=9:
 				nearPoints.update({(previousPoint[0]+shift,previousPoint[1]):self.db[(previousPoint[0]+shift,previousPoint[1])]})
-			if (previousPoint[0],previousPoint[1]+shift) not in self.triedPoints and 0>=previousPoint[1]+shift>=9:
+			if (previousPoint[0],previousPoint[1]+shift) not in self.triedPoints and 0<=previousPoint[1]+shift<=9:
 				nearPoints.update({(previousPoint[0],previousPoint[1]+shift):self.db[(previousPoint[0],previousPoint[1]+shift)]})
 		nearPoints = [(k,v) for k, v in sorted(nearPoints.items(), key=lambda item: item[1][2])] # Order the adjacent points by their value
-		self.likely_points =  nearPoints
+		return(nearPoints)
 
 	def driver(self): # If the top two points of the stack are in the same row or column, find the points in that grouping.
 		self.likely_points = []
@@ -132,4 +132,4 @@ class AI(Player):
 		if len(row) == 0:
 			self.successful_hits = self.successful_hits + [second,first]
 		ordered_row = [tup for tup in sorted(row,key = lambda t : t[1][2]) if tup[0] not in self.triedPoints] # Order Adjacent Points by Value
-		self.likely_points =  ordered_row
+		return(ordered_row)
