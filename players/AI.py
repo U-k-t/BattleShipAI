@@ -113,6 +113,7 @@ class AI(Player):
 				nearPoints.update({(previousPoint[0],previousPoint[1]+shift):self.db[(previousPoint[0],previousPoint[1]+shift)]})
 		nearPoints = [False] + [(k,v) for k, v in sorted(nearPoints.items())] # Order the adjacent points by their value
 		# , key=lambda item: item[1][2]
+		print( "Nearby Points are ", [tup[0] for tup in nearPoints[1:]])
 		return(nearPoints)
 
 	def driver(self): # If the top two points of the stack are in the same row or column, find the points in that grouping.
@@ -133,4 +134,5 @@ class AI(Player):
 			self.successful_hits = self.successful_hits + [second,first]
 		ordered_row = [True] + [tup for tup in sorted(row) if tup[0] not in self.triedPoints] # Order Adjacent Points by Value
 		# ,key = lambda t : t[1][2]
+		print( "Ship's Row/Col is ", [tup[0] for tup in ordered_row[1:]])
 		return(ordered_row)
