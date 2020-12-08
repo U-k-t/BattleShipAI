@@ -33,11 +33,10 @@ class Game:
 		self.player1 = None
 		self.player2 = None
 		self.turn = None
-
+    
 		self.player1turns = 0
 		self.player2turns = 0
 		self.whowon = None
-		
 		self.window =  None
 
 	@staticmethod #retrieves the current instance
@@ -109,10 +108,11 @@ class Game:
 	def game_over(self, who_won): # Ends a game that the user plays but not the application process.
 		self.window.close()
 		self.window = sg.Window("Battleship", self.create_game_over_layout(who_won), icon = "assets/battleship.ico", margins = (30, 30), finalize=True)
+		Database.get_instance().update_game()
 		
 		# Print Out Statistics:
 		print("\n\n*********************************\n")
-		print("Statisitics:\n Who Won? " + str(self.whowon) + "\n Player 1 turn count: " + str(self.player1turns) + "\n Player 2 turn count: " + str(self.player2turns))
+		print("Statistics:\n Who Won? " + str(self.whowon) + "\n Player 1 turn count: " + str(self.player1turns) + "\n Player 2 turn count: " + str(self.player2turns))
 		print("*********************************\n")
 		
 	def next_turn(self): # sends to the next play (Used only in player vs AI games)
