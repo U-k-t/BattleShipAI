@@ -33,7 +33,7 @@ class Game:
 		self.player1 = None
 		self.player2 = None
 		self.turn = None
-    
+
 		self.player1turns = 0
 		self.player2turns = 0
 		self.whowon = None
@@ -52,8 +52,8 @@ class Game:
 		else:
 			if self.window != None:
 				self.window.close()
-		
-		
+
+
 		self.window = sg.Window("Battleship", self.create_init_menu_layout(), icon = "assets/battleship.ico", margins = (30, 30))
 
 
@@ -95,9 +95,10 @@ class Game:
 		self.player1 = Basic()
 		self.player2 = Advanced()
 		self.turn = "battle"
-
 		self.player1.create_board()
 		self.player2.create_board()
+		Database.get_instance().save_board(self.player1.get_fleet())
+
 		self.window.close()
 		self.window = sg.Window("Battleship", self.create_ai_battle_layout(), icon = "assets/battleship.ico", margins = (30, 30), finalize=True)
 		self.toggle_both_board_buttons(True)
@@ -109,12 +110,12 @@ class Game:
 		self.window.close()
 		self.window = sg.Window("Battleship", self.create_game_over_layout(who_won), icon = "assets/battleship.ico", margins = (30, 30), finalize=True)
 		Database.get_instance().update_game()
-		
+
 		# Print Out Statistics:
 		print("\n\n*********************************\n")
 		print("Statistics:\n Who Won? " + str(self.whowon) + "\n Player 1 turn count: " + str(self.player1turns) + "\n Player 2 turn count: " + str(self.player2turns))
 		print("*********************************\n")
-		
+
 	def next_turn(self): # sends to the next play (Used only in player vs AI games)
 		if self.turn == "position":
 			if self.player1.finish_board_placement():
@@ -362,8 +363,6 @@ def main():
 	wait = 0 # Forces the player to perform 2 actions. There is a better way to do this, but idk how yet.
 	startcoord = -1
 	endcoord = -1
-	one_count = 0
-	two_count = 0
 	next = 1 # AI Gamemode variable only
 
 	#Event Loop:
@@ -403,8 +402,6 @@ def main():
 				pass
 			while(not Game.get_instance().attack_player2()):
 				pass
-			one_count = one_count + 1
-			two_count = two_count + 1
 			Game.get_instance().update_ui()
 
 		elif event == "confirm" and wait == 0: # Sends user to next stage in game.
@@ -449,8 +446,4 @@ def main():
 						while(not Game.get_instance().attack_player1()):
 							pass
 						Game.get_instance().update_ui()
-						two_count = two_count + 1
-
-	print("Player one took " + str(one_count) + " turns")
-	print("Player two took " + str(two_count) + " turns")
 main()
