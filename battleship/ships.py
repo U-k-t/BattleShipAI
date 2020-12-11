@@ -21,27 +21,27 @@ CARRIER_SIZE = 5
 class Ship():
 	
 	def __init__(self): # Creation of a non valid ship :
-		self.size = -1
-		self.name = " "
-		self.coordinates = [] # Location points (List of tuples)
+		self._size = -1
+		self._name = " "
+		self._coordinates = [] # Location points (List of tuples)
 	
 	def __init__(self, start, end, size, name): # Called only in child	  
-		self.size = size
-		self.name = name
+		self._size = size
+		self._name = name
 		if self.__validate_coords(start, end) :
-			self.coordinates = []
+			self._coordinates = []
 			self.__init_coordinates(start, end) # init list of coordinates				 
 		else: #Excpetion must be caught upon ship creation
 			raise InvalidShipException("invalid coordinates " + str(start) + " " + str(end)) 
 	
 	def get_coord(self):
-		return self.coordinates
+		return self._coordinates
 	
 	def get_size(self):
-		return self.size
+		return self._size
 		
 	def get_name(self):
-		return self.name
+		return self._name
 		
 	def get_token(self):
 		pass
@@ -56,11 +56,19 @@ class Ship():
 	
 	def __init_coordinates(self, start, end): # start/end tuple coordinates
 		if (start[0] == end[0]):
-			for y in range (start[1], end[1]+1):
-				self.coordinates.append((start[0],y))
+			if start[1] < end[1]:
+				for y in range (start[1], end[1]+1):
+					self._coordinates.append((start[0],y))
+			else:
+				for y in range (end[1], start[1]+1):
+					self._coordinates.append((start[0],y))
 		else:
-			for x in range (start[0], end[0]+1):
-				self.coordinates.append((x,start[1]))
+			if start[0] < end[0]:
+				for x in range (start[0], end[0]+1):
+					self._coordinates.append((x,start[1]))
+			else:
+				for x in range (end[0], start[0]+1):
+					self._coordinates.append((x,start[1]))
 				
 
 	'''***********************
@@ -69,18 +77,18 @@ class Ship():
 	
 	def is_already_placed(self, compare_coords):
 		for coord in compare_coords:
-			if coord in self.coordinates:
+			if coord in self._coordinates:
 				return True
 		return False
 	
 	def hit(self, target): # target represents a tuple (row,col)
-		if	target in self.coordinates :
-			self.coordinates.remove(target)
+		if	target in self._coordinates :
+			self._coordinates.remove(target)
 			return True # successful hit
 		return False
 		
 	def has_sunk(self):
-		return self.coordinates is None or len(self.coordinates) == 0 # Returns True if the ship has been sunk ( No coordinates left)
+		return self._coordinates is None or len(self._coordinates) == 0 # Returns True if the ship has been sunk ( No coordinates left)
 
 class Patrol(Ship):
 	
